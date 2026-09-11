@@ -3,7 +3,7 @@
 Standalone Marine ATIS decoder and AIS-catcher companion for a second RTL-SDR.
 
 The first RTL-SDR remains exclusively owned by AIS-catcher. AIS-ATIS Bridge lets
-you select another RTL-SDR, receive one marine VHF channel, validate the
+you select another RTL-SDR, receive selected marine VHF channels, validate the
 10-digit ATIS identity and correlate it with fresh vessels from AIS-catcher's
 local `ships.json` endpoint.
 
