@@ -1,0 +1,21 @@
+[Unit]
+Description=AIS-ATIS Bridge
+After=network-online.target ais-catcher.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=aisatis
+Group=aisatis
+Environment=AIS_ATIS_CONFIG=/etc/ais-atis-bridge/config.json
+ExecStart=/opt/ais-atis-bridge/venv/bin/ais-atis-bridge
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/etc/ais-atis-bridge
+
+[Install]
+WantedBy=multi-user.target

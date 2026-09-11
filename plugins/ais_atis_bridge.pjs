@@ -1,0 +1,7 @@
+// {"author":"EyeVisionsNL","description":"Open AIS-ATIS Bridge for the selected vessel","version":4}
+if (typeof AISCatcher !== 'undefined' && AISCatcher.PLUGIN_API_VERSION >= 4) {
+  AISCatcher.addTargetcardItem('radio', 'ATIS Bridge', 'Open local Marine ATIS correlation', () => {
+    const mmsi = AISCatcher.card_mmsi;
+    window.open(`${window.location.protocol}//${window.location.hostname}:8120/vessel/${encodeURIComponent(mmsi)}`);
+  });
+}
