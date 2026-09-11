@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ais-atis-bridge"
-version = "0.1.0"
+version = "0.1.1"
 description = "Marine ATIS decoder and AIS-catcher companion for a second RTL-SDR"
 requires-python = ">=3.11"
 dependencies = ["Flask>=3.0,<4", "numpy>=1.24,<3", "openpyxl>=3.1,<4"]

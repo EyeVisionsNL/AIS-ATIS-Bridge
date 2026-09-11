@@ -28,6 +28,7 @@ class ReceiverRuntime:
         if settings["tuning_mode"]=="fixed": channels=[next(x for x in channels if x["id"]==settings["selected_channel_id"])]
         else: channels=[x for x in channels if x["scan_enabled"]]
         gain=-1.0 if settings["gain_mode"]=="auto" else float(settings["gain_db"])
+        squelch = f"squelch_threshold = {int(settings.get('squelch_threshold_dbfs', -47))};" if settings.get("squelch_mode", "auto")=="manual" else "squelch_snr_threshold = 4.0;"
         frequencies=", ".join(f"{x['frequency_mhz']:.6f}" for x in channels); labels=", ".join('"'+x["label"].replace('"',"")+'"' for x in channels)
         return f'''log_scan_activity = true;
 devices:
@@ -42,7 +43,7 @@ devices:
     modulation = "nfm";
     freqs = ( {frequencies} );
     labels = ( {labels} );
-    squelch_snr_threshold = 4.0;
+    {squelch}
     outputs: ({{ type = "udp_stream"; dest_address = "127.0.0.1"; dest_port = 49555; continuous = true; }});
   }});
 }});

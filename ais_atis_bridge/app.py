@@ -20,7 +20,7 @@ def create_app() -> Flask:
     def status():
         settings = config.load(); state = runtime.status(); match = None; ais_error = None
         latest = state.get("latest") or {}
-        if latest.get("atis_code"):
+        if latest.get("atis_code") and latest.get("fresh"):
             try: match = ais.match_atis(latest["atis_code"], ais.read_ships(settings["ais_ships_url"]))
             except Exception as error: ais_error = str(error)
         return jsonify({"receiver":state,"ais_match":match,"ais_error":ais_error,"settings":settings})
@@ -30,7 +30,8 @@ def create_app() -> Flask:
 
     @app.post("/api/settings")
     def settings():
-        saved = config.save(request.get_json(force=True) or {})
+        try: saved = config.save({**config.load(), **(request.get_json(force=True) or {})})
+        except ValueError as error: return jsonify({"ok":False,"error":str(error)}),400
         runtime.start(saved)
         return jsonify({"ok":True,"settings":saved})
 
