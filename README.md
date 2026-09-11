@@ -74,3 +74,11 @@ The receiver panel offers automatic noise-tracking squelch (the existing 4 dB SN
 Click **Show on AIS map** for a fresh, uniquely matched vessel, or **Auto: off** to enable automatic following. Allow the map pop-up once. The same named AIS-catcher window is reused for subsequent fresh ATIS/AIS matches; turning Auto off stops following, and closing the map stops Auto. No map selection is made for stale, ambiguous or missing matches. Set `ais_viewer_url` in the service configuration if the viewer uses a different port or path; localhost is replaced with the browser-facing hostname. The plugin still opens the Bridge from a vessel card.
 
 The interface uses the FlexGround SDR / SDRCC dark blue theme. Real SDR reception and the installed AIS-catcher viewer still require an installation/hardware test.
+
+### Listen to marine voice
+
+Select the second SDR, select scan channels or a fixed channel, and click **Save and start**. Then click **Audio: off** to enable listening. Audio plays through the browser device speakers/headphones, not the Raspberry Pi audio output. Adjust **Volume**; 0% mutes playback. Audio is off on page load and requires a click.
+
+The browser receives live mono 16 kHz audio from the same receiver feed used for ATIS decoding. Receiver squelch applies to both. Turning listening off or changing volume does not stop decoding, scanning, or AIS Auto. Brief network interruptions reconnect automatically, without replaying a recording. The live buffer is bounded to one second of returned audio, with no audio files recorded. Browser background suspension can require another click on Audio.
+
+Validation includes a synthetic UDP tone through the receiver, HTTP PCM endpoint and decoder input, plus JavaScript playback/volume/stop tests. Audible reception from a real dongle still needs the Raspberry Pi test.

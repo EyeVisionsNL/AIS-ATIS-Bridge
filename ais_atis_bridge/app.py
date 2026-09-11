@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from io import BytesIO
-from flask import Flask, jsonify, redirect, render_template, request, send_file, url_for
+from flask import Response, Flask, jsonify, redirect, render_template, request, send_file, url_for
 
 from . import ais, config
 from .channel_xlsx import export_channels, import_channels
@@ -24,6 +24,20 @@ def create_app() -> Flask:
             try: match = ais.match_atis(latest["atis_code"], ais.read_ships(settings["ais_ships_url"]))
             except Exception as error: ais_error = str(error)
         return jsonify({"receiver":state,"ais_match":match,"ais_error":ais_error,"settings":settings})
+
+    @app.get("/api/audio.pcm")
+    def audio():
+        try:
+            value = request.args.get("after")
+            after = int(value) if value is not None else None
+            if after is not None and after < 0: raise ValueError()
+        except ValueError:
+            return jsonify({"error": "Invalid audio cursor"}), 400
+        sequence, pcm = runtime.audio.read(after)
+        return Response(pcm, mimetype="application/octet-stream", headers={
+            "Cache-Control": "no-store", "X-Audio-Sequence": str(sequence),
+            "X-Audio-Rate": "16000", "X-Receiver-Running": "1" if runtime.status()["running"] else "0",
+        })
 
     @app.get("/api/receivers")
     def receivers(): return jsonify(inventory())

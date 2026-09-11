@@ -3,9 +3,11 @@ import socket, subprocess, tempfile, threading, time
 from typing import Any
 import numpy as np
 from .atis import SAMPLE_RATE_HZ, decode_samples
+from .audio import LiveAudio
 
 class ReceiverRuntime:
     def __init__(self)->None:
+        self.audio=LiveAudio()
         self._lock=threading.RLock(); self._thread=None; self._process=None; self._stop=threading.Event()
         self._latest=None; self._error=None; self._started=None; self._packets=0
     def start(self,settings:dict[str,Any])->None:
@@ -22,6 +24,7 @@ class ReceiverRuntime:
             except subprocess.TimeoutExpired: process.kill()
         if self._thread and self._thread.is_alive(): self._thread.join(timeout=3)
         with self._lock: self._process=None
+        self.audio.clear()
     @staticmethod
     def render_airband_config(settings:dict[str,Any])->str:
         channels=settings["channels"]
@@ -60,7 +63,7 @@ devices:
                     except socket.timeout: continue
                     usable=len(raw)-(len(raw)%4)
                     if not usable: continue
-                    samples=np.frombuffer(raw[:usable],dtype="<f4"); buffer=np.concatenate((buffer,samples))[-SAMPLE_RATE_HZ:]
+                    samples=np.frombuffer(raw[:usable],dtype="<f4"); self.audio.publish(samples); buffer=np.concatenate((buffer,samples))[-SAMPLE_RATE_HZ:]
                     with self._lock: self._packets+=1
                     if len(buffer)>=SAMPLE_RATE_HZ and time.monotonic()-last_scan>=.25:
                         last_scan=time.monotonic(); decoded=decode_samples(buffer)
