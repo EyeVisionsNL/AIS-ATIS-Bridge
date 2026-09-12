@@ -7,6 +7,8 @@ Wants=network-online.target
 Type=simple
 User=aisatis
 Group=aisatis
+SupplementaryGroups=plugdev
+Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 Environment=AIS_ATIS_CONFIG=/etc/ais-atis-bridge/config.json
 ExecStart=/opt/ais-atis-bridge/venv/bin/ais-atis-bridge
 Restart=on-failure

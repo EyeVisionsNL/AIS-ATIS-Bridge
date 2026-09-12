@@ -16,7 +16,8 @@ def inventory() -> dict[str, Any]:
         )
         text = completed.stdout + "\n" + completed.stderr
     except subprocess.TimeoutExpired as error:
-        text = (error.stdout or "") + "\n" + (error.stderr or "")
+        parts = (error.stdout or "", error.stderr or "")
+        text = "\n".join(part.decode("utf-8", "replace") if isinstance(part, bytes) else part for part in parts)
     except OSError as error:
         return {"available": False, "devices": [], "error": str(error)}
     devices = []

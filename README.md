@@ -45,7 +45,7 @@ Open `http://<raspberry-pi-address>:8120`, select the second receiver and save.
 The installer copies `plugins/ais_atis_bridge.pjs` to the managed AIS-catcher
 plugin directory when `/etc/AIS-catcher/plugins` exists. Restart the
 AIS-catcher viewer after installation. The plugin adds an **ATIS Bridge** item
-to the selected vessel card and opens the local page with the MMSI selected.
+to the selected vessel card and opens the local Bridge page.
 
 ## Architecture
 
@@ -82,3 +82,19 @@ Select the second SDR, select scan channels or a fixed channel, and click **Save
 The browser receives live mono 16 kHz audio from the same receiver feed used for ATIS decoding. Receiver squelch applies to both. Turning listening off or changing volume does not stop decoding, scanning, or AIS Auto. Brief network interruptions reconnect automatically, without replaying a recording. The live buffer is bounded to one second of returned audio, with no audio files recorded. Browser background suspension can require another click on Audio.
 
 Validation includes a synthetic UDP tone through the receiver, HTTP PCM endpoint and decoder input, plus JavaScript playback/volume/stop tests. Audible reception from a real dongle still needs the Raspberry Pi test.
+
+## Installer verification (0.1.4)
+
+The installer now includes the required LAME/libshout development libraries, grants the service access via plugdev and common RTL2832U udev rules, fixes config-directory ownership, preserves existing settings, excludes checkout/build caches, restarts the installed service and checks its version through HTTP. The Airband build uses two jobs and explicitly enables RTL-SDR/NFM while disabling unused optional backends. Existing rtl_airband installations are reused.
+
+Validation: run `python scripts/validate_install_workflow.py` in a disposable root test environment. It executes first install, reinstall and installation from the installed directory with real wheel installation, configuration and dashboard startup. apt, CMake/git, users/ownership, udev and systemd are simulated; this is not a clean Raspberry Pi OS or native C++ build test. Native package installation is blocked in the development environment. The full Raspberry Pi OS 64-bit installation, USB access and reception remain hardware validation steps.
+
+To retry after a failed installation:
+
+```bash
+cd ~/AIS-ATIS-Bridge
+git pull --ff-only origin main
+sudo ./install.sh
+```
+
+If you edited tracked installer files locally, preserve those changes before pulling. The installer does not install or restart AIS-catcher itself.

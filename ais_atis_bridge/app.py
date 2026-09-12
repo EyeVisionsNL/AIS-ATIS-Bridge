@@ -3,7 +3,7 @@ from __future__ import annotations
 from io import BytesIO
 from flask import Response, Flask, jsonify, redirect, render_template, request, send_file, url_for
 
-from . import ais, config
+from . import __version__, ais, config
 from .channel_xlsx import export_channels, import_channels
 from .receivers import inventory
 from .runtime import runtime
@@ -23,7 +23,7 @@ def create_app() -> Flask:
         if latest.get("atis_code") and latest.get("fresh"):
             try: match = ais.match_atis(latest["atis_code"], ais.read_ships(settings["ais_ships_url"]))
             except Exception as error: ais_error = str(error)
-        return jsonify({"receiver":state,"ais_match":match,"ais_error":ais_error,"settings":settings})
+        return jsonify({"version":__version__,"receiver":state,"ais_match":match,"ais_error":ais_error,"settings":settings})
 
     @app.get("/api/audio.pcm")
     def audio():
