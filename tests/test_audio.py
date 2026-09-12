@@ -54,7 +54,9 @@ pcm=struct.pack('<1600f',*[.25*math.sin(2*math.pi*1000*i/16000) for i in range(1
 for _ in range(40):
  s.sendto(pcm,('127.0.0.1',49555));time.sleep(.03)
 """
+    launched = []
     def launch(*args, **kwargs):
+        launched.append(args[0])
         return real_popen([sys.executable, '-c', producer], **kwargs)
     client = create_app().test_client()
     cursor = client.get('/api/audio.pcm').headers['X-Audio-Sequence']
@@ -66,6 +68,7 @@ for _ in range(40):
                 if runtime.status()['packets_received'] >= 12: break
                 time.sleep(.03)
             assert decoder.called, runtime.status()
+            assert launched and launched[0][:2] == ['rtl_airband', '-F']
             response = client.get('/api/audio.pcm?after=' + cursor)
             assert response.status_code == 200
             assert response.headers['X-Audio-Rate'] == '16000'

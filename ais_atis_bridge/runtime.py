@@ -55,7 +55,10 @@ devices:
         try:
             with tempfile.NamedTemporaryFile("w",suffix=".conf") as cfg, socket.socket(socket.AF_INET,socket.SOCK_DGRAM) as server:
                 cfg.write(self.render_airband_config(settings)); cfg.flush(); server.bind(("127.0.0.1",49555)); server.settimeout(1)
-                process=subprocess.Popen(["rtl_airband","-e","-c",cfg.name],stdout=subprocess.DEVNULL,stderr=subprocess.PIPE)
+                # -F keeps rtl_airband in the foreground without the textual
+                # waterfall.  -e only disables syslog and still daemonizes,
+                # which makes the parent look stopped and escapes our control.
+                process=subprocess.Popen(["rtl_airband","-F","-c",cfg.name],stdout=subprocess.DEVNULL,stderr=subprocess.PIPE)
                 with self._lock: self._process=process
                 buffer=np.empty(0,dtype=np.float32); last_scan=0.0
                 while not self._stop.is_set() and process.poll() is None:

@@ -83,6 +83,10 @@ The browser receives live mono 16 kHz audio from the same receiver feed used for
 
 Validation includes a synthetic UDP tone through the receiver, HTTP PCM endpoint and decoder input, plus JavaScript playback/volume/stop tests. Audible reception from a real dongle still needs the Raspberry Pi test.
 
+## Receiver lifecycle fix (0.1.5)
+
+The Bridge runs RTLSDR-Airband with `-F`, keeping it in the foreground without the textual waterfall. This lets the Bridge correctly monitor, stop and restart the receiver instead of reporting `STOPPED` after RTLSDR-Airband daemonizes.
+
 ## Installer verification (0.1.4)
 
 The installer now includes the required LAME/libshout development libraries, grants the service access via plugdev and common RTL2832U udev rules, fixes config-directory ownership, preserves existing settings, excludes checkout/build caches, restarts the installed service and checks its version through HTTP. The Airband build uses two jobs and explicitly enables RTL-SDR/NFM while disabling unused optional backends. Existing rtl_airband installations are reused.
