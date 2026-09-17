@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any
 
 DEFAULT_CHANNELS=[("ch16_nood","CH16 Nood/Oproep",156.800,False),("ch13_brug","CH13 Brug/Schip",156.650,False),("ch11_vts","CH11 VTS",156.550,False),("ch14_vts","CH14 VTS",156.700,False),("ch12_haven","CH12 Haven",156.600,False),("ch10_werk","CH10 Werk",156.500,False),("ch09_oproep","CH09 Oproep",156.450,False),("ch08_werk","CH08 Werk",156.400,True),("ch06_sleep","CH06 Sleep",156.300,False),("v01_maasap","V01 Maasmond Approach",160.650,True),("v02_maaspl","V02 Maasvlakte Pilot",160.700,True),("v03_maasmd","V03 Maasmond",160.750,True),("v05_rozbg","V05 Rozenburg",160.850,True),("v60_waalh","V60 Waalhaven",160.625,True),("v61_botlek","V61 Botlek",160.675,True),("v62_oudem","V62 Oude Maas",160.725,True),("v63_eemhv","V63 Eemhaven",160.775,True),("v65_rozbg2","V65 Rozenburg",160.875,True),("v66_europt","V66 Europoort",160.925,True),("v79_dordr","V79 Dordrecht",161.575,True),("v80_maassl","V80 Maassluis",161.625,True),("v81_maasbr","V81 Maasbruggen",161.675,True)]
-DEFAULTS={"receiver":"","tuning_mode":"scan","selected_channel_id":"v61_botlek","channel_bank":"rotterdam_port","channels":[{"id":i,"label":n,"frequency_mhz":f,"scan_enabled":e} for i,n,f,e in DEFAULT_CHANNELS],"gain_mode":"auto","gain_db":20.7,"squelch_mode":"auto","squelch_threshold_dbfs":-47,"ppm":0,"ais_ships_url":"http://127.0.0.1:8119/ships.json","ais_viewer_url":"http://127.0.0.1:8119/","web_host":"0.0.0.0","web_port":8120}
+DEFAULTS={"receiver":"","tuning_mode":"scan","selected_channel_id":"v61_botlek","channel_bank":"rotterdam_port","channels":[{"id":i,"label":n,"frequency_mhz":f,"scan_enabled":e} for i,n,f,e in DEFAULT_CHANNELS],"gain_mode":"auto","gain_db":20.7,"squelch_mode":"auto","squelch_threshold_dbfs":-47,"scan_interval_ms":200,"ppm":0,"ais_ships_url":"http://127.0.0.1:8119/ships.json","ais_viewer_url":"http://127.0.0.1:8119/","web_host":"0.0.0.0","web_port":8120}
 
 def path()->Path: return Path(os.environ.get("AIS_ATIS_CONFIG","/etc/ais-atis-bridge/config.json"))
 def load()->dict[str,Any]:
@@ -40,6 +40,10 @@ def validate(raw:dict[str,Any])->dict[str,Any]:
     except (ValueError,TypeError) as error: raise ValueError("Squelch threshold must be an integer from -100 to -1 dBFS") from error
     if not -100<=threshold<=-1 or not threshold.is_integer(): raise ValueError("Squelch threshold must be an integer from -100 to -1 dBFS")
     result["squelch_mode"]=mode; result["squelch_threshold_dbfs"]=int(threshold)
+    try: scan_interval_ms=int(raw.get("scan_interval_ms",200))
+    except (ValueError,TypeError) as error: raise ValueError("Scan speed must be 100-500 ms per channel in 50 ms steps") from error
+    if scan_interval_ms<100 or scan_interval_ms>500 or scan_interval_ms%50: raise ValueError("Scan speed must be 100-500 ms per channel in 50 ms steps")
+    result["scan_interval_ms"]=scan_interval_ms
     for key in ("ais_ships_url","ais_viewer_url"):
         value=str(raw.get(key) or DEFAULTS[key]).strip()
         if not value.startswith(("http://127.0.0.1:","http://localhost:")): raise ValueError(f"{key} must use localhost")

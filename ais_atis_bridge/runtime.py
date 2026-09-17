@@ -33,8 +33,7 @@ class ReceiverRuntime:
         gain=-1.0 if settings["gain_mode"]=="auto" else float(settings["gain_db"])
         squelch = f"squelch_threshold = {int(settings.get('squelch_threshold_dbfs', -47))};" if settings.get("squelch_mode", "auto")=="manual" else "squelch_snr_threshold = 4.0;"
         frequencies=", ".join(f"{x['frequency_mhz']:.6f}" for x in channels); labels=", ".join('"'+x["label"].replace('"',"")+'"' for x in channels)
-        return f'''log_scan_activity = true;
-devices:
+        return f'''log_scan_activity = true;\nscan_interval_ms = {int(settings.get('scan_interval_ms', 200))};\ndevices:
 ({{
   type = "rtlsdr";
   serial = "{settings['receiver']}";

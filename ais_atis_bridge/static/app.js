@@ -1,12 +1,133 @@
-const $=id=>document.getElementById(id);let loaded=false,channelConfig=[];
-async function json(url,options){const response=await fetch(url,options);const data=await response.json().catch(()=>null);if(!response.ok)throw new Error(data?.error||response.statusText);return data}
-async function receivers(selected){const data=await json('/api/receivers');$('receiver').innerHTML='<option value="">Select receiver</option>'+data.devices.map(d=>`<option value="${d.serial}" ${d.serial===selected?'selected':''}>${d.index}: ${d.label} · ${d.serial}</option>`).join('')}
-function renderChannels(settings){channelConfig=settings.channels;$('selected_channel').innerHTML=channelConfig.map(c=>`<option value="${c.id}" ${c.id===settings.selected_channel_id?'selected':''}>${c.label} · ${c.frequency_mhz.toFixed(6)}</option>`).join('');$('channels').innerHTML=channelConfig.map(c=>`<label><input type="checkbox" data-channel="${c.id}" ${c.scan_enabled?'checked':''}><span>${c.label}</span><small>${c.frequency_mhz.toFixed(6)}</small></label>`).join('')}
-function details(latest,match){const rows=[];if(latest)rows.push(['ATIS code',latest.atis_code],['Callsign',latest.callsign||'—'],['Age',`${latest.age_seconds}s`]);if(match)rows.push(['AIS status',match.status],['Ship',match.shipname||'—'],['MMSI',match.mmsi||'—'],['Position',match.latitude!=null?`${match.latitude}, ${match.longitude}`:'—']);return rows.map(([a,b])=>`<dt>${a}</dt><dd>${b}</dd>`).join('')}
-async function refresh(){try{const data=await json('/api/status');const state=data.receiver;window.atisMap.update(data);$('state').textContent=state.state;$('identity').textContent=state.latest?.atis_code||'No validated ATIS received';$('details').innerHTML=details(state.latest,data.ais_match);if(!loaded){await receivers(data.settings.receiver);$('tuning_mode').value=data.settings.tuning_mode;$('gain_mode').value=data.settings.gain_mode;$('gain_db').value=data.settings.gain_db;$('squelch_mode').value=data.settings.squelch_mode;$('squelch_threshold_dbfs').value=data.settings.squelch_threshold_dbfs;syncSquelch();renderChannels(data.settings);loaded=true}if(state.error)$('message').textContent=state.error}catch(e){$('state').textContent='OFFLINE';window.atisMap.offline()}}
-$('settings').addEventListener('submit',async e=>{e.preventDefault();$('message').textContent='Saving…';try{const channels=channelConfig.map(c=>({...c,scan_enabled:document.querySelector(`[data-channel="${c.id}"]`).checked}));await json('/api/settings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({receiver:$('receiver').value,tuning_mode:$('tuning_mode').value,selected_channel_id:$('selected_channel').value,channels,gain_mode:$('gain_mode').value,gain_db:Number($('gain_db').value),squelch_mode:$('squelch_mode').value,squelch_threshold_dbfs:Number($('squelch_threshold_dbfs').value),ppm:0})});$('message').textContent='Receiver started'}catch(e){$('message').textContent=e.message}});
-$('stop').addEventListener('click',async()=>{await json('/api/receiver/stop',{method:'POST'});$('message').textContent='Receiver stopped'});
-$('xlsx').addEventListener('change',async e=>{if(!e.target.files[0])return;const body=new FormData();body.append('file',e.target.files[0]);try{await json('/api/channels/import.xlsx',{method:'POST',body});loaded=false;await refresh();$('message').textContent='Excel channel list imported'}catch(error){$('message').textContent=error.message}e.target.value=''});
-function syncSquelch(){$('squelch_threshold_dbfs').disabled=$('squelch_mode').value!=='manual'}
-$('squelch_mode').addEventListener('change',syncSquelch);
-refresh();setInterval(refresh,2000);
+const $ = id => document.getElementById(id);
+let loaded = false;
+let channelConfig = [];
+
+async function json(url, options) {
+  const response = await fetch(url, options);
+  const data = await response.json().catch(() => null);
+  if (!response.ok) throw new Error(data?.error || response.statusText);
+  return data;
+}
+
+async function receivers(selected) {
+  const data = await json('/api/receivers');
+  $('receiver').innerHTML = '<option value="">Select receiver</option>' + data.devices
+    .map(d => `<option value="${d.serial}" ${d.serial === selected ? 'selected' : ''}>${d.index}: ${d.label} · ${d.serial}</option>`)
+    .join('');
+}
+
+function renderChannels(settings) {
+  channelConfig = settings.channels;
+  $('selected_channel').innerHTML = channelConfig
+    .map(c => `<option value="${c.id}" ${c.id === settings.selected_channel_id ? 'selected' : ''}>${c.label} · ${c.frequency_mhz.toFixed(6)}</option>`)
+    .join('');
+  $('channels').innerHTML = channelConfig
+    .map(c => `<label><input type="checkbox" data-channel="${c.id}" ${c.scan_enabled ? 'checked' : ''}><span>${c.label}</span><small>${c.frequency_mhz.toFixed(6)}</small></label>`)
+    .join('');
+}
+
+function details(latest, match) {
+  const rows = [];
+  if (latest) rows.push(['ATIS code', latest.atis_code], ['Callsign', latest.callsign || '—'], ['Age', `${latest.age_seconds}s`]);
+  if (match) rows.push(['AIS status', match.status], ['Ship', match.shipname || '—'], ['MMSI', match.mmsi || '—'], ['Position', match.latitude != null ? `${match.latitude}, ${match.longitude}` : '—']);
+  return rows.map(([a, b]) => `<dt>${a}</dt><dd>${b}</dd>`).join('');
+}
+
+function renderState(state) {
+  const badge = $('state');
+  const value = String(state || 'OFFLINE').toUpperCase();
+  badge.textContent = value;
+  badge.dataset.state = value.toLowerCase();
+}
+
+function syncSquelch() {
+  $('squelch_threshold_dbfs').disabled = $('squelch_mode').value !== 'manual';
+}
+
+function syncScanSpeed() {
+  const value = Number($('scan_speed').value || 200);
+  $('scan_speed_value').textContent = `${Math.round(value)} ms/ch`;
+}
+
+async function refresh() {
+  try {
+    const data = await json('/api/status');
+    const state = data.receiver;
+    window.atisMap.update(data);
+    renderState(state.state);
+    $('identity').textContent = state.latest?.atis_code || 'No validated ATIS received';
+    $('details').innerHTML = details(state.latest, data.ais_match);
+    if (!loaded) {
+      await receivers(data.settings.receiver);
+      $('tuning_mode').value = data.settings.tuning_mode;
+      $('gain_mode').value = data.settings.gain_mode;
+      $('gain_db').value = data.settings.gain_db;
+      $('squelch_mode').value = data.settings.squelch_mode;
+      $('squelch_threshold_dbfs').value = data.settings.squelch_threshold_dbfs;
+      $('scan_speed').value = String(data.settings.scan_interval_ms ?? 200);
+      syncSquelch();
+      syncScanSpeed();
+      renderChannels(data.settings);
+      loaded = true;
+    }
+    if (state.error) $('message').textContent = state.error;
+  } catch (error) {
+    renderState('OFFLINE');
+    window.atisMap.offline();
+  }
+}
+
+$('settings').addEventListener('submit', async event => {
+  event.preventDefault();
+  $('message').textContent = 'Saving…';
+  try {
+    const channels = channelConfig.map(c => ({
+      ...c,
+      scan_enabled: document.querySelector(`[data-channel="${c.id}"]`).checked,
+    }));
+    await json('/api/settings', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        receiver: $('receiver').value,
+        tuning_mode: $('tuning_mode').value,
+        selected_channel_id: $('selected_channel').value,
+        channels,
+        gain_mode: $('gain_mode').value,
+        gain_db: Number($('gain_db').value),
+        squelch_mode: $('squelch_mode').value,
+        squelch_threshold_dbfs: Number($('squelch_threshold_dbfs').value),
+        scan_interval_ms: Number($('scan_speed').value),
+        ppm: 0,
+      }),
+    });
+    $('message').textContent = 'Receiver started';
+  } catch (error) {
+    $('message').textContent = error.message;
+  }
+});
+
+$('stop').addEventListener('click', async () => {
+  await json('/api/receiver/stop', {method: 'POST'});
+  $('message').textContent = 'Receiver stopped';
+});
+
+$('xlsx').addEventListener('change', async event => {
+  if (!event.target.files[0]) return;
+  const body = new FormData();
+  body.append('file', event.target.files[0]);
+  try {
+    await json('/api/channels/import.xlsx', {method: 'POST', body});
+    loaded = false;
+    await refresh();
+    $('message').textContent = 'Excel channel list imported';
+  } catch (error) {
+    $('message').textContent = error.message;
+  }
+  event.target.value = '';
+});
+
+$('squelch_mode').addEventListener('change', syncSquelch);
+$('scan_speed').addEventListener('input', syncScanSpeed);
+refresh();
+setInterval(refresh, 2000);

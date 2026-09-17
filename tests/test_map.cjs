@@ -3,15 +3,22 @@ const vm = require('node:vm');
 const fs = require('node:fs');
 const assert = require('node:assert/strict');
 const path = require('node:path');
-const nodes = Object.fromEntries(['show-map', 'auto-map', 'map-message'].map(id => [id, {
-  disabled: true, textContent: '', addEventListener(event, fn) { this[event] = fn; }, setAttribute() {}
+const ids = ['show-map', 'auto-map', 'map-message', 'map-zoom'];
+const nodes = Object.fromEntries(ids.map(id => [id, {
+  disabled: true, textContent: '', value: id === 'map-zoom' ? '14' : '',
+  addEventListener(event, fn) { this[event] = fn; }, setAttribute() {}
 }]));
 let opens = 0, blocked = false;
 const map = {closed: false, location: {href: ''}, focus() {}};
-const window = {location: {hostname: 'receiver.local'}, open(url, name) {
-  if (blocked) return null;
-  opens++; assert.equal(name, 'ais-atis-bridge-map'); map.location.href = url; return map;
-}};
+const storage = new Map();
+const window = {
+  location: {hostname: 'receiver.local'},
+  localStorage: {getItem: key => storage.get(key) ?? null, setItem: (key, value) => storage.set(key, value)},
+  open(url, name) {
+    if (blocked) return null;
+    opens++; assert.equal(name, 'ais-atis-bridge-map'); map.location.href = url; return map;
+  }
+};
 vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../ais_atis_bridge/static/map.js'), 'utf8'), {
   window, URL, document: {getElementById: id => nodes[id]}
 });
@@ -19,8 +26,11 @@ const state = {settings: {ais_viewer_url: 'http://127.0.0.1:8119/'}, receiver: {
 window.atisMap.update(state); nodes['auto-map'].click();
 assert.equal(opens, 1); assert.equal(nodes['auto-map'].textContent, 'Auto: on');
 assert(map.location.href.startsWith('http://receiver.local:8119/'));
+assert(map.location.href.includes('zoom=14'));
+nodes['map-zoom'].value = '16'; nodes['map-zoom'].change();
+assert(map.location.href.includes('zoom=16')); assert.equal(storage.get('aisAtisBridge.mapZoom'), '16');
 state.receiver.latest = {fresh: true}; state.ais_match = {matched: true, mmsi: '244123456'};
-window.atisMap.update(state); assert(map.location.href.includes('mmsi=244123456'));
+window.atisMap.update(state); assert(map.location.href.includes('mmsi=244123456')); assert(map.location.href.includes('zoom=16'));
 state.ais_match.mmsi = '244654321'; window.atisMap.update(state);
 assert(map.location.href.includes('mmsi=244654321')); assert.equal(opens, 1);
 const last = map.location.href;
@@ -33,4 +43,4 @@ assert.equal(nodes['auto-map'].textContent, 'Auto: off');
 blocked = true; nodes['auto-map'].click(); assert.equal(nodes['auto-map'].textContent, 'Auto: off');
 assert(nodes['map-message'].textContent.includes('pop-ups'));
 window.atisMap.offline(); assert(nodes['show-map'].disabled);
-console.log('PASS map controls: one window, new vessel, stale match, Auto off, closed window, blocked popup, offline');
+console.log('PASS map controls: adjustable zoom, one window, new vessel, stale match, Auto off, closed window, blocked popup, offline');

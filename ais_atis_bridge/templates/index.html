@@ -1,7 +1,106 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>AIS-ATIS Bridge</title><link rel="stylesheet" href="/static/style.css"></head>
-<body><main><header><div><p class="eyebrow">AIS-catcher companion</p><h1>AIS-ATIS Bridge</h1></div><span id="state" class="badge">LOADING</span></header>
-<section class="grid"><article><h2>Latest Marine ATIS</h2><div id="identity" class="identity">No validated ATIS received</div><dl id="details"></dl><div class="row"><button id="show-map" type="button" disabled>Show on AIS map</button><button id="auto-map" class="secondary" type="button" aria-pressed="false" disabled>Auto: off</button></div><p id="map-message" class="hint" aria-live="polite">Waiting for a fresh ATIS/AIS match.</p><h2>Live marine audio</h2><button id="audio-toggle" class="secondary" type="button" aria-pressed="false">Audio: off</button><label for="audio-volume">Volume <span id="audio-volume-value">70%</span></label><input id="audio-volume" type="range" min="0" max="100" value="70"><p id="audio-message" class="hint" aria-live="polite">Audio plays on this device. Click Audio to listen.</p></article>
-<article><h2>Second RTL-SDR</h2><form id="settings"><label>Receiver<select id="receiver" required><option value="">Select receiver</option></select></label><div class="row"><label>Mode<select id="tuning_mode"><option value="scan">Scan channels</option><option value="fixed">Fixed channel</option></select></label><label>Fixed channel<select id="selected_channel"></select></label></div><div class="row"><label>Gain<select id="gain_mode"><option value="auto">Automatic</option><option value="manual">Manual</option></select></label><label>Gain dB<input id="gain_db" type="number" min="0" max="49.6" step="0.1"></label></div><div class="row"><label>Squelch<select id="squelch_mode"><option value="auto">Automatic (noise tracking)</option><option value="manual">Manual (dBFS)</option></select></label><label>Threshold dBFS<input id="squelch_threshold_dbfs" type="number" min="-100" max="-1" step="1" value="-47" required disabled></label></div><p class="hint">Manual: a higher threshold admits stronger signals only. Too low a threshold can hold the scanner on noise.</p><h3>Scan channels</h3><div id="channels" class="channels"></div><button type="submit">Save and start</button><button class="secondary" id="stop" type="button">Stop receiver</button><div class="row"><a class="button secondary" href="/api/channels/export.xlsx">Export Excel</a><label class="button secondary">Import Excel<input id="xlsx" type="file" accept=".xlsx" hidden></label></div><p id="message"></p></form></article></section>
-<footer>Read-only AIS correlation · Never use for navigation or safety</footer></main><script src="/static/audio.js"></script><script src="/static/map.js"></script><script src="/static/app.js"></script></body></html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>AIS-ATIS Bridge</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<main class="shell">
+  <header class="topbar">
+    <div class="brand-copy">
+      <p class="eyebrow">EyeVisionsNL · AIS-catcher companion</p>
+      <h1>AIS-ATIS Bridge</h1>
+      <p class="tagline">Listen · Decode · Correlate · Follow</p>
+    </div>
+    <span id="state" class="status-badge" data-state="loading">LOADING</span>
+  </header>
+
+  <section class="dashboard-grid">
+    <article class="card vessel-card">
+      <div class="card-heading">
+        <div><span class="section-kicker">Marine traffic</span><h2>⚓ Latest Marine ATIS</h2></div>
+      </div>
+      <div class="identity-panel">
+        <span class="identity-label">Validated identity</span>
+        <div id="identity" class="identity">No validated ATIS received</div>
+      </div>
+      <dl id="details" class="details-grid"></dl>
+
+      <div class="subpanel">
+        <div class="subpanel-heading"><strong>🗺 AIS map</strong><span>Manual or automatic vessel follow</span></div>
+        <div class="map-controls">
+          <button id="show-map" class="button primary" type="button" disabled>Show on AIS map ↗</button>
+          <label class="compact-control" for="map-zoom"><span>Zoom</span><input id="map-zoom" type="number" min="3" max="18" step="1" value="14" aria-label="AIS map zoom level"></label>
+          <button id="auto-map" class="button accent" type="button" aria-pressed="false" disabled>Auto: off</button>
+        </div>
+        <p id="map-message" class="hint" aria-live="polite">Waiting for a fresh ATIS/AIS match.</p>
+      </div>
+
+      <div class="subpanel audio-panel">
+        <div class="subpanel-heading"><strong>🔊 Live marine audio</strong><span>Audio from the active receiver</span></div>
+        <div class="audio-controls">
+          <button id="audio-toggle" class="button secondary" type="button" aria-pressed="false">Audio: off</button>
+          <label class="range-control" for="audio-volume"><span>Volume <strong id="audio-volume-value">70%</strong></span><input id="audio-volume" type="range" min="0" max="100" value="70"></label>
+        </div>
+        <p id="audio-message" class="hint" aria-live="polite">Audio plays on this device. Click Audio to listen.</p>
+      </div>
+    </article>
+
+    <article class="card receiver-card">
+      <div class="card-heading">
+        <div><span class="section-kicker">Receiver control</span><h2>📻 Second RTL-SDR</h2></div>
+      </div>
+      <form id="settings">
+        <div class="control-section">
+          <label>Receiver<select id="receiver" required><option value="">Select receiver</option></select></label>
+          <div class="two-col">
+            <label>Mode<select id="tuning_mode"><option value="scan">Scan channels</option><option value="fixed">Fixed channel</option></select></label>
+            <label>Fixed channel<select id="selected_channel"></select></label>
+          </div>
+        </div>
+
+        <div class="control-section rf-section">
+          <div class="section-title"><strong>RF settings</strong><span>Receiver gain, squelch and scan timing</span></div>
+          <div class="two-col">
+            <label>Gain<select id="gain_mode"><option value="auto">Automatic</option><option value="manual">Manual</option></select></label>
+            <label>Gain dB<input id="gain_db" type="number" min="0" max="49.6" step="0.1"></label>
+          </div>
+          <div class="two-col">
+            <label>Squelch<select id="squelch_mode"><option value="auto">Automatic (noise tracking)</option><option value="manual">Manual (dBFS)</option></select></label>
+            <label>Threshold dBFS<input id="squelch_threshold_dbfs" type="number" min="-100" max="-1" step="1" value="-47" required disabled></label>
+          </div>
+          <p class="hint">Manual: a higher threshold admits stronger signals only. Too low a threshold can hold the scanner on noise.</p>
+          <label class="range-control scan-speed-control" for="scan_speed">
+            <span>Scan speed <strong id="scan_speed_value">200 ms/ch</strong></span>
+            <input id="scan_speed" type="range" min="100" max="500" step="50" value="200">
+            <small>Lower is faster; 200 ms/ch matches the original RTLSDR-Airband speed.</small>
+          </label>
+        </div>
+
+        <div class="control-section">
+          <div class="section-title"><strong>Scan channels</strong><span>Select the channels included in scan mode</span></div>
+          <div id="channels" class="channels"></div>
+        </div>
+
+        <div class="action-grid">
+          <button type="submit" class="button success">▶ Save and start</button>
+          <button class="button danger" id="stop" type="button">■ Stop receiver</button>
+        </div>
+        <div class="action-grid secondary-actions">
+          <a class="button secondary" href="/api/channels/export.xlsx">⇩ Export Excel</a>
+          <label class="button secondary file-button">⇧ Import Excel<input id="xlsx" type="file" accept=".xlsx" hidden></label>
+        </div>
+        <p id="message" class="action-message" aria-live="polite"></p>
+      </form>
+    </article>
+  </section>
+
+  <footer>Read-only AIS correlation · Never use for navigation or safety</footer>
+</main>
+<script src="/static/audio.js"></script>
+<script src="/static/map.js"></script>
+<script src="/static/app.js"></script>
+</body>
+</html>
