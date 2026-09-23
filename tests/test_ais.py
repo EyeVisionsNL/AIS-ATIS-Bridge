@@ -22,7 +22,7 @@ def test_ambiguous_match_fails_closed():
 
 
 def test_stale_match_is_rejected():
-    result=match_atis("9244123456",{"ships":[ship(last_signal=60)]})
+    result=match_atis("9244123456",{"ships":[ship(last_signal=1801)]})
     assert result["status"] == "stale"
 
 
@@ -45,7 +45,7 @@ def test_dutch_callsign_matches_foreign_mmsi(mid):
 
 
 @pytest.mark.parametrize("changes,status", [
-    ({"last_signal": 31}, "stale"),
+    ({"last_signal": 1801}, "stale"),
     ({"last_signal": None}, "stale"),
     ({"validated": 0}, "not_validated"),
     ({"lat": 91}, "invalid_position"),
@@ -64,7 +64,7 @@ def test_fallback_duplicate_rejected():
 
 
 def test_standard_rejection_not_bypassed():
-    standard = barendsz(mmsi=244595190, last_signal=31)
+    standard = barendsz(mmsi=244595190, last_signal=1801)
     result = match_atis("9244044821", [standard, barendsz()])
     assert result["status"] == "stale" and not result["matched"]
     result = match_atis("9244044821", [standard, barendsz(mmsi=244595191), barendsz()])
@@ -86,3 +86,11 @@ def test_standard_matching_preserved(code, method):
 
 def test_fallback_respects_explicit_age_limit():
     assert match_atis("9244044821", [barendsz()], max_age_seconds=7)["status"] == "stale"
+
+
+@pytest.mark.parametrize("code", ["9244044821", "9205044821", "9205595190"])
+@pytest.mark.parametrize("age", [31, 601, 1799, 1800, 1801])
+def test_thirty_minute_boundary(code, age):
+    result = match_atis(code, [barendsz(last_signal=age)])
+    assert result["matched"] is (age <= 1800)
+    assert result["status"] == ("matched" if age <= 1800 else "stale")

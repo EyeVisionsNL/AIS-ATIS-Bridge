@@ -83,14 +83,21 @@ The browser receives live mono 16 kHz audio from the same receiver feed used for
 
 Validation includes a synthetic UDP tone through the receiver, HTTP PCM endpoint and decoder input, plus JavaScript playback/volume/stop tests. Audible reception from a real dongle still needs the Raspberry Pi test.
 
+## AIS retention window (0.1.8)
+
+AIS matches now accept records up to 1800 seconds (30 minutes) old, matching
+AIS-catcher's default retention window. Older records remain rejected. This
+changes the allowed AIS age only; the received ATIS must still be fresh and
+the vessel identity and position must pass the existing checks.
+
 ## ATIS callsign fallback (0.1.7)
 
 When standard ATIS matching finds no candidate, Dutch ATIS identities (MID
 244, 245 or 246) also match the exact normalized call sign in the AIS feed.
 This supports PD4821 / BARENDSZ with Belgian MMSI 205595190. The match reports
 `callsign_exact_fallback`; duplicate call signs, invalid MMSI/positions and
-unvalidated or stale records remain rejected. The Bridge retains its existing
-30-second AIS freshness limit. Foreign call signs are not guessed, and a
+unvalidated or stale records remain rejected. The Bridge uses a 30-minute AIS freshness limit, matching the default
+AIS-catcher retention window. Foreign call signs are not guessed, and a
 rejected or ambiguous standard match is never bypassed.
 
 Update an existing installation with `git pull --ff-only origin main` followed

@@ -51,7 +51,7 @@ def codes_for_ship(ship: dict[str, Any]) -> dict[str, str]:
     return result
 
 
-def match_atis(atis_code: str, payload: Any, max_age_seconds: float = 30.0) -> dict[str, Any]:
+def match_atis(atis_code: str, payload: Any, max_age_seconds: float = 1800.0) -> dict[str, Any]:
     code = str(atis_code or "").strip()
     result: dict[str, Any] = {"matched": False, "status": "invalid_atis", "atis_code": code or None}
     if len(code) != 10 or not code.isdigit() or not code.startswith("9"):
