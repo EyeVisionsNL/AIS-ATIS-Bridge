@@ -56,8 +56,20 @@ def match_atis(atis_code: str, payload: Any, max_age_seconds: float = 30.0) -> d
     result: dict[str, Any] = {"matched": False, "status": "invalid_atis", "atis_code": code or None}
     if len(code) != 10 or not code.isdigit() or not code.startswith("9"):
         return result
-    candidates = [(ship, codes_for_ship(ship).get(code)) for ship in _ships(payload)]
+    ships = _ships(payload)
+    candidates = [(ship, codes_for_ship(ship).get(code)) for ship in ships]
     candidates = [(ship, method) for ship, method in candidates if method]
+    # Dutch ATIS identity may be retained with a foreign AIS MMSI. Only use
+    # the decoder's bounded Dutch projection when no standard candidate exists;
+    # never bypass an ambiguous or rejected standard match.
+    if not candidates and code[1:4] in {"244", "245", "246"}:
+        letter = int(code[4:6])
+        if 1 <= letter <= 26:
+            callsign = f"P{chr(64 + letter)}{code[6:]}"
+            candidates = [
+                (ship, "callsign_exact_fallback") for ship in ships
+                if str(ship.get("callsign") or "").strip().upper() == callsign
+            ]
     result.update(status="not_found", candidate_count=len(candidates))
     if len(candidates) != 1:
         if len(candidates) > 1:
@@ -67,16 +79,18 @@ def match_atis(atis_code: str, payload: Any, max_age_seconds: float = 30.0) -> d
     age = _number(ship.get("last_signal", ship.get("age")))
     lat, lon = _number(ship.get("lat")), _number(ship.get("lon"))
     validated = _number(ship.get("validated"))
+    mmsi = str(ship.get("mmsi") or "").strip().removesuffix(".0")
     if validated != 1:
         result["status"] = "not_validated"
     elif age is None or not 0 <= age <= max_age_seconds:
         result["status"] = "stale"
-    elif lat is None or lon is None or not -90 <= lat <= 90 or not -180 <= lon <= 180:
+    elif (len(mmsi) != 9 or not mmsi.isdigit()
+          or lat is None or lon is None or not -90 <= lat <= 90 or not -180 <= lon <= 180):
         result["status"] = "invalid_position"
     else:
         result.update({
             "matched": True, "status": "matched", "match_method": method,
-            "mmsi": str(ship.get("mmsi")).removesuffix(".0"),
+            "mmsi": mmsi,
             "callsign": str(ship.get("callsign") or "").strip().upper() or None,
             "shipname": str(ship.get("shipname") or "").strip()[:80] or None,
             "latitude": round(lat, 6), "longitude": round(lon, 6),

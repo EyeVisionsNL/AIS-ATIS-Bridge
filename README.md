@@ -83,6 +83,20 @@ The browser receives live mono 16 kHz audio from the same receiver feed used for
 
 Validation includes a synthetic UDP tone through the receiver, HTTP PCM endpoint and decoder input, plus JavaScript playback/volume/stop tests. Audible reception from a real dongle still needs the Raspberry Pi test.
 
+## ATIS callsign fallback (0.1.7)
+
+When standard ATIS matching finds no candidate, Dutch ATIS identities (MID
+244, 245 or 246) also match the exact normalized call sign in the AIS feed.
+This supports PD4821 / BARENDSZ with Belgian MMSI 205595190. The match reports
+`callsign_exact_fallback`; duplicate call signs, invalid MMSI/positions and
+unvalidated or stale records remain rejected. The Bridge retains its existing
+30-second AIS freshness limit. Foreign call signs are not guessed, and a
+rejected or ambiguous standard match is never bypassed.
+
+Update an existing installation with `git pull --ff-only origin main` followed
+by `sudo ./install.sh` from its checkout. Live reception needs Marcel's test;
+the regression fixture uses the captured AIS data and a reconstructed ATIS code.
+
 ## Receiver lifecycle fix (0.1.5)
 
 The Bridge runs RTLSDR-Airband with `-F`, keeping it in the foreground without the textual waterfall. This lets the Bridge correctly monitor, stop and restart the receiver instead of reporting `STOPPED` after RTLSDR-Airband daemonizes.
