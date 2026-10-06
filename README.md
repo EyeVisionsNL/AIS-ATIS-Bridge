@@ -11,6 +11,14 @@ local `ships.json` endpoint.
 
 > Initial hardware-validation release. Do not use for navigation or safety.
 
+## Dashboard preview
+
+Current 0.1.12 dashboard with illustrative receiver settings and four example
+recordings. These are demonstration data, not live reception. The radar rotates
+in the running dashboard; this screenshot is static.
+
+![AIS-ATIS Bridge dashboard: SDR and channels, recent transmissions, validated ATIS and updates](images/dashboard.jpg)
+
 ## First release scope
 
 - Raspberry Pi OS 64-bit and Ubuntu 24.04/26.04
