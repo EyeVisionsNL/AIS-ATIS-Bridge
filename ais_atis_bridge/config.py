@@ -6,8 +6,27 @@ from copy import deepcopy
 from pathlib import Path
 from typing import Any
 
-CHANNEL_MASTER_VERSION = 2
+CHANNEL_MASTER_VERSION = 3
 CHANNEL_MASTER_PATH = Path(__file__).with_name("static") / "rotterdam-port-channels.json"
+
+DATA_ONLY_FREQUENCIES = {
+    156.525,
+    157.2, 161.8,
+    157.25, 161.85,
+    157.3, 161.9,
+    161.95, 162.0,
+    157.225, 161.825,
+    157.275, 161.875,
+    157.325, 161.925,
+    161.975, 162.025,
+}
+
+
+def _is_data_only_frequency(value: Any) -> bool:
+    try:
+        return round(float(value), 6) in DATA_ONLY_FREQUENCIES
+    except (TypeError, ValueError):
+        return False
 
 
 def _master_channels() -> list[dict[str, Any]]:
@@ -78,7 +97,7 @@ def _preserve_user_channels(raw: dict[str, Any]) -> dict[str, Any]:
                 frequency = round(float(item.get("frequency_mhz")), 6)
             except (TypeError, ValueError):
                 continue
-            if frequency in master_frequencies:
+            if frequency in master_frequencies or _is_data_only_frequency(frequency):
                 continue
             channel_id = str(item.get("id") or "").strip()
             if not channel_id or channel_id in used_ids:
@@ -130,7 +149,8 @@ def validate(raw:dict[str,Any])->dict[str,Any]:
         except (TypeError,ValueError) as error: raise ValueError("Invalid channel frequency") from error
         if not channel_id or len(channel_id)>48 or channel_id in ids: raise ValueError(f"Missing or duplicate channel ID: {channel_id}")
         if not label or len(label)>64: raise ValueError(f"Invalid name for channel {channel_id}")
-        if not 156.0<=frequency<=163.0 or frequency in frequencies: raise ValueError(f"Invalid or duplicate frequency for {channel_id}")
+        if not 155.775<=frequency<=162.6 or frequency in frequencies: raise ValueError(f"Invalid or duplicate frequency for {channel_id}")
+        if _is_data_only_frequency(frequency): raise ValueError(f"Data-only marine frequency is not supported in Voice: {channel_id}")
         ids.add(channel_id); frequencies.add(frequency); channels.append({"id":channel_id,"label":label,"frequency_mhz":frequency,"scan_enabled":bool(item.get("scan_enabled"))})
     if result["tuning_mode"]=="scan" and not any(x["scan_enabled"] for x in channels): raise ValueError("Enable at least one scan channel")
     selected=str(raw.get("selected_channel_id") or ""); result["selected_channel_id"]=selected if selected in ids else channels[0]["id"]; result["channels"]=channels

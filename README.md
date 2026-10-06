@@ -1,7 +1,7 @@
 # AIS-ATIS Bridge
 
 Standalone Marine ATIS decoder and AIS-catcher companion for a second RTL-SDR.
-Stable version 0.1.12 includes SDRCC-style Smart Gain, recent Marine audio replays and a
+Stable version 0.1.13 includes SDRCC-style Smart Gain, recent Marine audio replays and a
 stable/beta updater.
 
 The first RTL-SDR remains exclusively owned by AIS-catcher. AIS-ATIS Bridge lets
@@ -13,7 +13,7 @@ local `ships.json` endpoint.
 
 ## Dashboard preview
 
-Current 0.1.12 dashboard with illustrative receiver settings and four example
+Current stable dashboard with illustrative receiver settings and four example
 recordings. These are demonstration data, not live reception. The radar rotates
 in the running dashboard; this screenshot is static.
 
@@ -26,7 +26,7 @@ in the running dashboard; this screenshot is static.
 - fixed-channel and multi-channel NFM scanning through RTLSDR-Airband
 - one-shot Smart Gain probe followed by a bounded, fixed tuner gain
 - up to four recent squelch-open Marine recordings, held in memory
-- the updated SDRCC Marine workbook (59 valid VHF00–VHF88 entries), with Excel import and export
+- the SDRCC-aligned Marine Voice workbook (133 unique analogue voice carriers), with Excel import and export
 - RAINWAT ATIS validation (10-unit symbols, time diversity and ECC)
 - exact, fail-closed ATIS-to-AIS matching
 - SDRCC-inspired dashboard, update channel selector and verified updater
@@ -41,6 +41,20 @@ RTLSDR-Airband is built from pinned commit
 - a running AIS-catcher viewer exposing `http://127.0.0.1:8119/ships.json`
 - a second RTL-SDR that is not used by AIS-catcher
 - Debian/Raspberry Pi OS 64-bit or Ubuntu
+
+## Marine voice catalog (0.1.13)
+
+Version 0.1.13 aligns AIS-ATIS Bridge with SDRCC's voice-only Dutch Marine
+catalog. The maintained bank contains 133 unique analogue receive carriers,
+including the Dutch supplementary/private channels and both relevant sides of
+duplex voice channels. VHF55L/56L are supported by the 155.775–162.600 MHz
+Marine receive range.
+
+Data-only carriers are deliberately excluded from Voice: AIS1/AIS2, VHF70 DSC,
+ASM1/ASM2 and the VDES/satellite allocations on 24/25/26 and 84/85/86. AIS
+continues to be handled by AIS-catcher. Existing installations migrate by
+frequency, retain scan choices and custom voice channels, and remove obsolete
+data-only entries.
 
 ## Update startup fix (0.1.12)
 
@@ -64,7 +78,7 @@ sudo ./install.sh
 Then refresh the dashboard. Subsequent compatible releases use the update
 button again. The user confirmed the repaired release working on their Raspberry Pi.
 
-## Stable 0.1.12
+## Stable 0.1.13
 
 This release brings the standalone Bridge up to the Marine Traffic feature set:
 Smart Gain, the latest four recordings with channel names and replay, the
@@ -102,8 +116,9 @@ configuration, and reinstalling from the installed directory. Update and
 rollback behavior were tested with simulated host services. Real RTL-SDR
 reception and native systemd operation still require a hardware test.
 
-Version 0.1.12 was approved for Stable after the user confirmed it working on
-their Raspberry Pi. The main branch now includes the updater manifest.
+Version 0.1.13 was approved for Stable after the user confirmed the update and
+new 133-channel Voice list working on their Raspberry Pi. The main branch includes
+the verified updater manifest.
 
 ## Install stable
 
