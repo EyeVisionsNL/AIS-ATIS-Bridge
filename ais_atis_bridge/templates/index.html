@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>AIS-ATIS Bridge · Marine Traffic</title>
-  <link rel="stylesheet" href="/static/style.css?v=0.1.10">
+  <link rel="stylesheet" href="/static/style.css?v=0.1.11">
 </head>
 <body>
 <main class="shell">
@@ -22,42 +22,12 @@
   </header>
 
   <section class="dashboard-grid">
-    <article class="card vessel-card">
-      <div class="card-heading">
-        <div><span class="section-kicker">Marine traffic</span><h2>⚓ Latest Marine ATIS</h2></div>
-      </div>
-      <div class="identity-panel">
-        <span class="identity-label">Validated identity</span>
-        <div id="identity" class="identity">No validated ATIS received</div>
-      </div>
-      <dl id="details" class="details-grid"></dl>
-
-      <div class="subpanel">
-        <div class="subpanel-heading"><strong>🗺 AIS map</strong><span>Manual or automatic vessel follow</span></div>
-        <div class="map-controls">
-          <button id="show-map" class="button primary" type="button" disabled>Show on AIS map ↗</button>
-          <label class="compact-control" for="map-zoom"><span>Zoom</span><input id="map-zoom" type="number" min="3" max="18" step="1" value="14" aria-label="AIS map zoom level"></label>
-          <button id="auto-map" class="button accent" type="button" aria-pressed="false" disabled>Auto: off</button>
-        </div>
-        <p id="map-message" class="hint" aria-live="polite">Waiting for a fresh ATIS/AIS match.</p>
-      </div>
-
-      <div class="subpanel audio-panel">
-        <div class="subpanel-heading"><strong>🔊 Live marine audio</strong><span>Audio from the active receiver</span></div>
-        <div class="audio-controls">
-          <button id="audio-toggle" class="button secondary" type="button" aria-pressed="false">Audio: off</button>
-          <label class="range-control" for="audio-volume"><span>Volume <strong id="audio-volume-value">70%</strong></span><input id="audio-volume" type="range" min="0" max="100" value="70"></label>
-        </div>
-        <p id="audio-message" class="hint" aria-live="polite">Audio plays on this device. Click Audio to listen.</p>
-      </div>
-    </article>
-
     <article class="card receiver-card">
       <div class="card-heading">
-        <div><span class="section-kicker">Receiver control</span><h2>📻 Second RTL-SDR</h2></div>
+        <div><span class="section-kicker">Receiver control</span><h2>📻 SDR &amp; channels</h2></div>
       </div>
       <form id="settings">
-        <div class="control-section">
+        <div class="control-section receiver-selection">
           <label>Receiver<select id="receiver" required><option value="">Select receiver</option></select></label>
           <div class="two-col">
             <label>Mode<select id="tuning_mode"><option value="scan">Scan channels</option><option value="fixed">Fixed channel</option></select></label>
@@ -84,7 +54,7 @@
           </label>
         </div>
 
-        <div class="control-section">
+        <div class="control-section channel-selection">
           <div class="section-title"><strong>Scan channels</strong><span>Select the channels included in scan mode</span></div>
           <div id="channels" class="channels"></div>
         </div>
@@ -100,16 +70,17 @@
         </div>
         <p id="message" class="action-message" aria-live="polite"></p>
 
-        <section class="update-panel" aria-labelledby="update-heading">
-          <div class="section-title"><strong id="update-heading">Bridge updates</strong><span>Choose a release channel</span></div>
-          <label class="channel-switch"><span><strong id="channel-label">Stable</strong><small id="channel-description">Recommended release</small></span><input id="beta-toggle" type="checkbox" aria-label="Use beta updates"><i></i></label>
-          <p id="update-versions" class="update-versions">Installed version · checking channel</p>
-          <div class="action-grid update-actions"><button id="check-update" class="button secondary" type="button">↻ Check for updates</button><button id="install-update" class="button accent" type="button" disabled>Install update</button></div>
-          <p id="update-message" class="action-message" aria-live="polite">Stable updates keep the main release. Beta follows the develop branch.</p>
-        </section>
+
       </form>
+      <div class="subpanel audio-panel">
+        <div class="subpanel-heading"><strong>🔊 Live marine audio</strong><span>Audio from the active receiver</span></div>
+        <div class="audio-controls">
+          <button id="audio-toggle" class="button secondary" type="button" aria-pressed="false">Audio: off</button>
+          <label class="range-control" for="audio-volume"><span>Volume <strong id="audio-volume-value">70%</strong></span><input id="audio-volume" type="range" min="0" max="100" value="70"></label>
+        </div>
+        <p id="audio-message" class="hint" aria-live="polite">Audio plays on this device. Click Audio to listen.</p>
+      </div>
     </article>
-  </section>
 
   <section class="card recordings-card" aria-labelledby="recordings-heading">
     <div class="card-heading"><div><span class="section-kicker">Squelch-gated capture</span><h2 id="recordings-heading">Recent Marine transmissions</h2></div><span class="recording-limit">LATEST 4 · IN-MEMORY</span></div>
@@ -117,10 +88,41 @@
     <div id="recordings" class="recordings-list" role="list"></div>
   </section>
 
+    <article class="card vessel-card">
+      <div class="card-heading">
+        <div><span class="section-kicker">Marine traffic</span><h2>⚓ Validated Marine ATIS</h2></div>
+      </div>
+      <div class="identity-panel">
+        <span class="identity-label">Validated identity</span>
+        <div id="identity" class="identity">No validated ATIS received</div>
+      </div>
+      <dl id="details" class="details-grid"></dl>
+
+      <div class="subpanel">
+        <div class="subpanel-heading"><strong>🗺 AIS map</strong><span>Manual or automatic vessel follow</span></div>
+        <div class="map-controls">
+          <button id="show-map" class="button primary" type="button" disabled>Show on AIS map ↗</button>
+          <label class="compact-control" for="map-zoom"><span>Zoom</span><input id="map-zoom" type="number" min="3" max="18" step="1" value="14" aria-label="AIS map zoom level"></label>
+          <button id="auto-map" class="button accent" type="button" aria-pressed="false" disabled>Auto: off</button>
+        </div>
+        <p id="map-message" class="hint" aria-live="polite">Waiting for a fresh ATIS/AIS match.</p>
+      </div>
+
+    </article>
+
+        <section class="card update-panel updates-card" aria-labelledby="update-heading">
+          <div class="section-title"><h2 id="update-heading">Bridge updates</h2><span>Choose a release channel</span></div>
+          <label class="channel-switch"><span><strong id="channel-label">Stable</strong><small id="channel-description">Recommended release</small></span><input id="beta-toggle" type="checkbox" aria-label="Use beta updates"><i></i></label>
+          <p id="update-versions" class="update-versions">Installed version · checking channel</p>
+          <div class="action-grid update-actions"><button id="check-update" class="button secondary" type="button">↻ Check for updates</button><button id="install-update" class="button accent" type="button" disabled>Install update</button></div>
+          <p id="update-message" class="action-message" aria-live="polite">Stable updates keep the main release. Beta follows the develop branch.</p>
+        </section>
+  </section>
+
   <footer>Read-only AIS correlation · Never use for navigation or safety</footer>
 </main>
-<script src="/static/audio.js?v=0.1.10"></script>
-<script src="/static/map.js?v=0.1.10"></script>
-<script src="/static/app.js?v=0.1.10"></script>
+<script src="/static/audio.js?v=0.1.11"></script>
+<script src="/static/map.js?v=0.1.11"></script>
+<script src="/static/app.js?v=0.1.11"></script>
 </body>
 </html>

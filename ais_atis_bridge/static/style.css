@@ -83,3 +83,24 @@ h2{color:#e3f4ff}.subpanel,.control-section{border-color:#203950;background:#091
 @media(max-width:620px){.shell{padding:12px}.topbar{min-height:auto;padding:19px;align-items:center}.hero-side{gap:10px}.radar-art{width:84px;height:84px}.hero-state{justify-items:end}.hero-state>span{font-size:.55rem}.status-badge{min-width:84px;padding:7px 8px;font-size:.68rem}.hero-tags{margin-top:13px}.hero-tags span{font-size:.55rem}.secondary-actions,.recordings-list{grid-template-columns:1fr}.recordings-card{padding:15px}.update-panel{padding:11px}}
 @media(max-width:420px){.hero-side{display:none}.topbar{align-items:flex-start}.secondary-actions{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){.radar-sweep{animation:none}}
+
+
+/* Marine workflow: receiver, replays, validated identity, then maintenance. */
+.dashboard-grid{display:flex;flex-direction:column;gap:18px}
+.topbar{min-height:245px;background:linear-gradient(90deg,rgba(5,20,35,.94) 0%,rgba(5,24,39,.83) 34%,rgba(5,24,39,.12) 69%,rgba(5,24,39,.4) 100%),url('/static/marine-ship-banner.webp') center 55%/cover;border-color:#26859a;box-shadow:0 14px 40px #0006,inset 0 -3px 0 #27c7ba}
+.brand-copy{position:relative;z-index:1}.topbar h1 span{color:#6fe9e0}.hero-tags span:nth-child(2){background:#79502070;border-color:#e6a650;color:#ffe0a3}.hero-tags span:nth-child(3){background:#155a4670;border-color:#38bc91;color:#a4f2cf}
+.hero-side{position:relative;z-index:1}.radar-art{background-color:#062332c9;box-shadow:0 0 28px #39d7cc38}.hero-state{padding:8px 12px;border-radius:9px;background:#071827ce}
+.receiver-card{border-top:3px solid #38bdf8}.receiver-card .section-kicker{color:#77d7ff}
+.recordings-card{margin-top:0;border-top:3px solid #38d9aa}.recordings-card .section-kicker{color:#73e8bd}.recording-limit{background:#103d32;border-color:#2d8d71;color:#a0f3cd}.recording-row{border-left:3px solid #2ba981}
+.vessel-card{border-top:3px solid #a88af9}.vessel-card .section-kicker{color:#c0a9ff}.identity-panel{border-color:#9e7aec66;background:linear-gradient(135deg,#272044,#102238)}.identity{color:#cab4ff}
+.updates-card{margin-top:0;border-top:3px solid #efa947;background:linear-gradient(145deg,#272339,#142333)}.updates-card .section-title>span{color:#e6bc80}.updates-card .channel-switch{max-width:540px}.updates-card .update-actions{max-width:540px}
+#settings{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px 18px}
+#settings .receiver-selection{grid-column:1;grid-row:1;margin:0}
+#settings .rf-section{grid-column:1;grid-row:2;margin:0}
+#settings .channel-selection{grid-column:2;grid-row:1 / span 2;margin:0;display:flex;flex-direction:column}
+#settings .channels{flex:1;max-height:455px;min-height:220px}
+#settings>.action-grid,#settings>.action-message{grid-column:1 / -1;margin:0}
+.receiver-card>.audio-panel{margin-top:14px;border-left:3px solid #f2b75d}
+.recordings-list{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media(max-width:700px){#settings{display:flex;flex-direction:column}#settings .channel-selection{order:1}#settings .receiver-selection{order:0}#settings .rf-section{order:2}#settings>.action-grid,#settings>.action-message{order:3}#settings .channels{max-height:250px}.topbar{min-height:220px;background-position:65% center}.hero-side{gap:8px}.radar-art{width:86px;height:86px}.recordings-list{grid-template-columns:1fr}}
+@media(max-width:420px){.hero-side{display:flex;flex-direction:column;align-items:flex-end}.topbar{gap:8px;padding:16px}.topbar h1{font-size:1.65rem}.hero-state{padding:6px}.hero-tags{gap:5px}.radar-art{width:70px;height:70px}.brand-copy{min-width:0}.tagline{max-width:210px}}
