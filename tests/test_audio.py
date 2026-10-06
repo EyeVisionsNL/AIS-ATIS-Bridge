@@ -62,7 +62,7 @@ for _ in range(40):
     cursor = client.get('/api/audio.pcm').headers['X-Audio-Sequence']
     try:
         with patch('ais_atis_bridge.runtime.subprocess.Popen', side_effect=launch), patch('ais_atis_bridge.runtime.decode_samples', return_value=[]) as decoder:
-            runtime.start(validate({'receiver': 'TEST'}))
+            runtime.start(validate({'receiver': 'TEST', 'gain_mode': 'manual'}))
             deadline = time.monotonic() + 4
             while time.monotonic() < deadline:
                 if runtime.status()['packets_received'] >= 12: break
@@ -83,3 +83,43 @@ for _ in range(40):
     finally:
         runtime.stop()
     assert client.get('/api/audio.pcm?after=0').data == b''
+
+
+def test_gated_udp_audio_becomes_a_recent_channel_recording():
+    runtime = ReceiverRuntime()
+    real_popen = subprocess.Popen
+    producer = """
+import socket,time,struct
+s=socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
+pcm=struct.pack('<1600f', *([0.15] * 1600))
+for index in range(160):
+ s.sendto(pcm, ('127.0.0.1', 49555))
+ if 2 <= index < 12: s.sendto(pcm, ('127.0.0.1', 49556))
+ time.sleep(.025)
+"""
+    def launch(*args, **kwargs):
+        return real_popen([sys.executable, '-c', producer], **kwargs)
+
+    settings = validate({
+        'receiver': 'TEST', 'tuning_mode': 'fixed', 'selected_channel_id': 'vhf61',
+        'gain_mode': 'smart',
+    })
+    try:
+        with patch('ais_atis_bridge.runtime.probe_receiver_gain', return_value={
+            'gain_db': 20.0, 'reference_gain_db': 12.5, 'probed_channels': 1,
+        }) as probe, patch('ais_atis_bridge.runtime.subprocess.Popen', side_effect=launch):
+            runtime.start(settings)
+            deadline = time.monotonic() + 4
+            while time.monotonic() < deadline:
+                if runtime.recordings.list() and runtime.recordings.list()[0]['complete']:
+                    break
+                time.sleep(.03)
+            assert runtime._thread.is_alive(), "Replay should finish while live audio continues"
+            assert probe.called
+            clips = runtime.recordings.list()
+            assert len(clips) == 1 and clips[0]['complete'] is True
+            assert clips[0]['channel'] == 'VHF61 - Verkeersbegeleiding'
+            wav = runtime.recordings.get_wav(clips[0]['id'])
+            assert wav and wav[:4] == b'RIFF' and wav[8:12] == b'WAVE'
+    finally:
+        runtime.stop()

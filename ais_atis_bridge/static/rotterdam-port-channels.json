@@ -1,0 +1,356 @@
+[
+  {
+    "id": "vhf00",
+    "label": "VHF00 - KNRM reddingskanaal",
+    "frequency_mhz": 156.0,
+    "scan_enabled": false
+  },
+  {
+    "id": "vhf01",
+    "label": "VHF01 - Verkeersbegeleiding",
+    "frequency_mhz": 160.65,
+    "scan_enabled": false
+  },
+  {
+    "id": "vhf02",
+    "label": "VHF02 - Verkeersbegeleiding",
+    "frequency_mhz": 160.7,
+    "scan_enabled": false
+  },
+  {
+    "id": "vhf03",
+    "label": "VHF03 - Verkeersbegeleiding",
+    "frequency_mhz": 160.75,
+    "scan_enabled": false
+  },
+  {
+    "id": "vhf04",
+    "label": "VHF04 - Verkeersbegeleiding",
+    "frequency_mhz": 160.8,
+    "scan_enabled": false
+  },
+  {
+    "id": "vhf05",
+    "label": "VHF05 - Verkeersbegeleiding",
+    "frequency_mhz": 160.85,
+    "scan_enabled": false
+  },
+  {
+    "id": "vhf06",
+    "label": "VHF06 - Nautisch intership",
+    "frequency_mhz": 156.3,
+    "scan_enabled": false
+  },
+  {
+    "id": "vhf07",
+    "label": "VHF07 - Verkeersbegeleiding",
+    "frequency_mhz": 160.95,
+    "scan_enabled": false
+  },
+  {
+    "id": "vhf08",
+    "label": "VHF08 - Nautisch intership",
+    "frequency_mhz": 156.4,
+    "scan_enabled": false
+  },
+  {
+    "id": "vhf09",
+    "label": "VHF09 - Divers nautisch gebruik",
+    "frequency_mhz": 156.45,
+    "scan_enabled": false
+  },
+  {
+    "id": "vhf10",
+    "label": "VHF10 - Intership / aanroep binnenwateren",
+    "frequency_mhz": 156.5,
+    "scan_enabled": false
+  },
+  {
+    "id": "vhf11",
+    "label": "VHF11 - Havenoperaties",
+    "frequency_mhz": 156.55,
+    "scan_enabled": false
+  },
+  {
+    "id": "vhf12",
+    "label": "VHF12 - Havenoperaties",
+    "frequency_mhz": 156.6,
+    "scan_enabled": false
+  },
+  {
+    "id": "vhf13",
+    "label": "VHF13 - Nautisch intership",
+    "frequency_mhz": 156.65,
+    "scan_enabled": false
+  },
+  {
+    "id": "vhf14",
+    "label": "VHF14 - Havenoperaties",
+    "frequency_mhz": 156.7,
+    "scan_enabled": false
+  },
+  {
+    "id": "vhf15",
+    "label": "VHF15 - Intraship",
+    "frequency_mhz": 156.75,
+    "scan_enabled": false
+  },
+  {
+    "id": "vhf16",
+    "label": "VHF16 - Nood, spoed, veiligheid, aanroep",
+    "frequency_mhz": 156.8,
+    "scan_enabled": false
+  },
+  {
+    "id": "vhf17",
+    "label": "VHF17 - Intraship",
+    "frequency_mhz": 156.85,
+    "scan_enabled": false
+  },
+  {
+    "id": "vhf18",
+    "label": "VHF18 - Bruggen & sluizen",
+    "frequency_mhz": 161.5,
+    "scan_enabled": false
+  },
+  {
+    "id": "vhf19",
+    "label": "VHF19 - Nautische informatie",
+    "frequency_mhz": 161.55,
+    "scan_enabled": false
+  },
+  {
+    "id": "vhf20",
+    "label": "VHF20 - Bruggen & sluizen",
+    "frequency_mhz": 161.6,
+    "scan_enabled": false
+  },
+  {
+    "id": "vhf21",
+    "label": "VHF21 - Verkeersbegeleiding",
+    "frequency_mhz": 161.65,
+    "scan_enabled": false
+  },
+  {
+    "id": "vhf22",
+    "label": "VHF22 - Bruggen & sluizen",
+    "frequency_mhz": 161.7,
+    "scan_enabled": false
+  },
+  {
+    "id": "vhf23",
+    "label": "VHF23 - Kustwacht",
+    "frequency_mhz": 161.75,
+    "scan_enabled": false
+  },
+  {
+    "id": "vhf24",
+    "label": "VHF24 - Nautische informatie",
+    "frequency_mhz": 161.8,
+    "scan_enabled": false
+  },
+  {
+    "id": "vhf25",
+    "label": "VHF25 - Verkeersbegeleiding",
+    "frequency_mhz": 161.85,
+    "scan_enabled": false
+  },
+  {
+    "id": "vhf26",
+    "label": "VHF26 - Nautische informatie",
+    "frequency_mhz": 161.9,
+    "scan_enabled": false
+  },
+  {
+    "id": "vhf27",
+    "label": "VHF27 - Verkeersbegeleiding",
+    "frequency_mhz": 157.35,
+    "scan_enabled": false
+  },
+  {
+    "id": "vhf28",
+    "label": "VHF28 - Nautische informatie",
+    "frequency_mhz": 157.4,
+    "scan_enabled": false
+  },
+  {
+    "id": "vhf31",
+    "label": "VHF31 - Jachthavens / Marina",
+    "frequency_mhz": 162.15,
+    "scan_enabled": false
+  },
+  {
+    "id": "vhf60",
+    "label": "VHF60 - Verkeersbegeleiding",
+    "frequency_mhz": 160.625,
+    "scan_enabled": false
+  },
+  {
+    "id": "vhf61",
+    "label": "VHF61 - Verkeersbegeleiding",
+    "frequency_mhz": 160.675,
+    "scan_enabled": true
+  },
+  {
+    "id": "vhf62",
+    "label": "VHF62 - Verkeersbegeleiding",
+    "frequency_mhz": 160.725,
+    "scan_enabled": false
+  },
+  {
+    "id": "vhf63",
+    "label": "VHF63 - Verkeersbegeleiding",
+    "frequency_mhz": 160.775,
+    "scan_enabled": true
+  },
+  {
+    "id": "vhf64",
+    "label": "VHF64 - Nautische informatie",
+    "frequency_mhz": 160.825,
+    "scan_enabled": false
+  },
+  {
+    "id": "vhf65",
+    "label": "VHF65 - Verkeersbegeleiding",
+    "frequency_mhz": 160.875,
+    "scan_enabled": false
+  },
+  {
+    "id": "vhf66",
+    "label": "VHF66 - Nautische informatie",
+    "frequency_mhz": 160.925,
+    "scan_enabled": false
+  },
+  {
+    "id": "vhf67",
+    "label": "VHF67 - Opsporing & redding (SAR)",
+    "frequency_mhz": 156.375,
+    "scan_enabled": false
+  },
+  {
+    "id": "vhf68",
+    "label": "VHF68 - Verkeersbegeleiding",
+    "frequency_mhz": 156.425,
+    "scan_enabled": false
+  },
+  {
+    "id": "vhf69",
+    "label": "VHF69 - Verkeersbegeleiding",
+    "frequency_mhz": 156.475,
+    "scan_enabled": false
+  },
+  {
+    "id": "vhf70",
+    "label": "VHF70 - DSC nood- en aanroepkanaal",
+    "frequency_mhz": 156.525,
+    "scan_enabled": false
+  },
+  {
+    "id": "vhf71",
+    "label": "VHF71 - Havenoperaties",
+    "frequency_mhz": 156.575,
+    "scan_enabled": false
+  },
+  {
+    "id": "vhf72",
+    "label": "VHF72 - Sleep/berging & sociaal verkeer",
+    "frequency_mhz": 156.625,
+    "scan_enabled": false
+  },
+  {
+    "id": "vhf73",
+    "label": "VHF73 - Verontreinigingsbestrijding",
+    "frequency_mhz": 156.675,
+    "scan_enabled": false
+  },
+  {
+    "id": "vhf74",
+    "label": "VHF74 - Havenoperaties",
+    "frequency_mhz": 156.725,
+    "scan_enabled": false
+  },
+  {
+    "id": "vhf75",
+    "label": "VHF75 - Havenoperaties",
+    "frequency_mhz": 156.775,
+    "scan_enabled": false
+  },
+  {
+    "id": "vhf76",
+    "label": "VHF76 - Divers nautisch gebruik",
+    "frequency_mhz": 156.825,
+    "scan_enabled": false
+  },
+  {
+    "id": "vhf77",
+    "label": "VHF77 - Sociaal / bunkering / proviand",
+    "frequency_mhz": 156.875,
+    "scan_enabled": false
+  },
+  {
+    "id": "vhf78",
+    "label": "VHF78 - Nautische informatie",
+    "frequency_mhz": 161.525,
+    "scan_enabled": false
+  },
+  {
+    "id": "vhf79",
+    "label": "VHF79 - Verkeersbegeleiding",
+    "frequency_mhz": 161.575,
+    "scan_enabled": false
+  },
+  {
+    "id": "vhf80",
+    "label": "VHF80 - Verkeersbegeleiding",
+    "frequency_mhz": 161.625,
+    "scan_enabled": false
+  },
+  {
+    "id": "vhf81",
+    "label": "VHF81 - Verkeersbegeleiding",
+    "frequency_mhz": 161.675,
+    "scan_enabled": false
+  },
+  {
+    "id": "vhf82",
+    "label": "VHF82 - Bunkering & proviandering",
+    "frequency_mhz": 161.725,
+    "scan_enabled": false
+  },
+  {
+    "id": "vhf83",
+    "label": "VHF83 - Kustwacht",
+    "frequency_mhz": 161.775,
+    "scan_enabled": false
+  },
+  {
+    "id": "vhf84",
+    "label": "VHF84 - Bruggen & sluizen",
+    "frequency_mhz": 161.825,
+    "scan_enabled": false
+  },
+  {
+    "id": "vhf85",
+    "label": "VHF85 - Bruggen & sluizen",
+    "frequency_mhz": 161.875,
+    "scan_enabled": false
+  },
+  {
+    "id": "vhf86",
+    "label": "VHF86 - Nautische informatie",
+    "frequency_mhz": 161.925,
+    "scan_enabled": false
+  },
+  {
+    "id": "vhf87",
+    "label": "VHF87 - Divers nautisch gebruik",
+    "frequency_mhz": 157.375,
+    "scan_enabled": false
+  },
+  {
+    "id": "vhf88",
+    "label": "VHF88 - Tijdelijke maritieme evenementen",
+    "frequency_mhz": 157.425,
+    "scan_enabled": false
+  }
+]

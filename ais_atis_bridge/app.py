@@ -1,12 +1,15 @@
 from __future__ import annotations
 
 from io import BytesIO
+import json
+import subprocess
 from flask import Response, Flask, jsonify, redirect, render_template, request, send_file, url_for
 
 from . import __version__, ais, config
 from .channel_xlsx import export_channels, import_channels
 from .receivers import inventory
 from .runtime import runtime
+from . import update_manager
 
 
 def create_app() -> Flask:
@@ -23,7 +26,7 @@ def create_app() -> Flask:
         if latest.get("atis_code") and latest.get("fresh"):
             try: match = ais.match_atis(latest["atis_code"], ais.read_ships(settings["ais_ships_url"]))
             except Exception as error: ais_error = str(error)
-        return jsonify({"version":__version__,"receiver":state,"ais_match":match,"ais_error":ais_error,"settings":settings})
+        return jsonify({"version":__version__,"receiver":state,"ais_match":match,"ais_error":ais_error,"settings":settings,"update":update_manager.get_status()})
 
     @app.get("/api/audio.pcm")
     def audio():
@@ -41,6 +44,53 @@ def create_app() -> Flask:
 
     @app.get("/api/receivers")
     def receivers(): return jsonify(inventory())
+
+    @app.get("/api/recordings/<recording_id>.wav")
+    def recording(recording_id: str):
+        payload = runtime.recordings.get_wav(recording_id)
+        if payload is None:
+            return jsonify({"error": "Recording expired or is still in progress"}), 404
+        return send_file(BytesIO(payload), mimetype="audio/wav", as_attachment=True,
+                         download_name=f"marine-{recording_id[:8]}.wav", max_age=0)
+
+    @app.get("/api/update/status")
+    def update_status():
+        refresh = str(request.args.get("refresh") or "").strip().lower() in {"1", "true", "yes"}
+        return jsonify(update_manager.check_remote_version() if refresh else update_manager.get_status())
+
+    @app.post("/api/update/channel")
+    def update_channel():
+        payload = request.get_json(silent=True) or {}
+        channel = payload.get("channel")
+        if channel not in ("main", "develop"):
+            return jsonify({"ok": False, "error": "Choose stable (main) or beta (develop)."}), 400
+        try:
+            return jsonify(update_manager.set_channel(channel))
+        except (RuntimeError, ValueError) as error:
+            return jsonify({"ok": False, "error": str(error)}), 409
+
+    @app.post("/api/update/install")
+    def install_update():
+        status = update_manager.check_remote_version()
+        if status.get("check_error"):
+            return jsonify({"ok": False, "error": "Update check failed: " + str(status["check_error"])}), 503
+        if not status.get("update_available"):
+            return jsonify({"ok": False, "error": "No update is available for the selected channel."}), 409
+        if any(not item.get("complete") for item in runtime.recordings.list()):
+            return jsonify({"ok": False, "error": "Wait for the current Marine recording to finish before updating."}), 409
+        try:
+            result = subprocess.run(["sudo", "-n", "/usr/local/sbin/ais-atis-update"],
+                                    capture_output=True, text=True, timeout=20, check=False)
+        except (OSError, subprocess.SubprocessError) as error:
+            return jsonify({"ok": False, "error": f"Could not start updater: {error}"}), 503
+        try:
+            payload = json.loads((result.stdout or "").strip() or "{}")
+        except ValueError:
+            payload = {}
+        if result.returncode != 0 or not payload.get("ok"):
+            message = payload.get("error") or (result.stderr or result.stdout or "Updater did not start").strip()
+            return jsonify({"ok": False, "error": message}), 503
+        return jsonify(payload), 202
 
     @app.post("/api/settings")
     def settings():

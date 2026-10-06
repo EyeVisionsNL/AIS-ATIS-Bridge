@@ -1,6 +1,8 @@
 # AIS-ATIS Bridge
 
 Standalone Marine ATIS decoder and AIS-catcher companion for a second RTL-SDR.
+Version 0.1.9 adds SDRCC-style Smart Gain, recent Marine audio replays and a
+stable/beta updater.
 
 The first RTL-SDR remains exclusively owned by AIS-catcher. AIS-ATIS Bridge lets
 you select another RTL-SDR, receive selected marine VHF channels, validate the
@@ -14,10 +16,12 @@ local `ships.json` endpoint.
 - Raspberry Pi OS 64-bit and Ubuntu 24.04/26.04
 - RTL-SDR inventory and explicit second-receiver selection
 - fixed-channel and multi-channel NFM scanning through RTLSDR-Airband
-- selectable marine channel list with Excel import and export
+- one-shot Smart Gain probe followed by a bounded, fixed tuner gain
+- up to four recent squelch-open Marine recordings, held in memory
+- the updated SDRCC Marine workbook (59 valid VHF00–VHF88 entries), with Excel import and export
 - RAINWAT ATIS validation (10-unit symbols, time diversity and ECC)
 - exact, fail-closed ATIS-to-AIS matching
-- simple local web page and JSON API
+- SDRCC-inspired dashboard, update channel selector and verified updater
 - optional AIS-catcher target-card link plugin
 - systemd service and uninstall script
 
@@ -39,6 +43,10 @@ sudo ./install.sh
 ```
 
 Open `http://<raspberry-pi-address>:8120`, select the second receiver and save.
+Use **Bridge updates** to check Stable (`main`) or Beta (`develop`) and install
+an available version. The updater verifies SHA-256 hashes, backs up the
+installed application files, restarts the Bridge and rolls back if its health
+check fails. `/etc/ais-atis-bridge/config.json` is kept outside the update.
 
 ## AIS-catcher viewer plugin
 
@@ -64,8 +72,7 @@ pytest
 
 ## License
 
-GPL-3.0. The ATIS decoder is derived from the validated decoder in FlexGround
-SDR, also maintained by EyeVisionsNL.
+GPL-3.0. The ATIS decoder is derived from the validated decoder in SDRCC, also maintained by EyeVisionsNL.
 
 ### Squelch and map follow
 
@@ -73,15 +80,53 @@ The receiver panel offers automatic noise-tracking squelch (the existing 4 dB SN
 
 Click **Show on AIS map** for a fresh, uniquely matched vessel, or **Auto: off** to enable automatic following. Allow the map pop-up once. The same named AIS-catcher window is reused for subsequent fresh ATIS/AIS matches; turning Auto off stops following, and closing the map stops Auto. No map selection is made for stale, ambiguous or missing matches. Set `ais_viewer_url` in the service configuration if the viewer uses a different port or path; localhost is replaced with the browser-facing hostname. The plugin still opens the Bridge from a vessel card.
 
-The interface uses the FlexGround SDR / SDRCC dark blue theme. Real SDR reception and the installed AIS-catcher viewer still require an installation/hardware test.
+The interface uses the SDRCC dark blue theme with a radar banner. Real SDR reception and the installed AIS-catcher viewer still require an installation/hardware test.
 
 ### Listen to marine voice
 
 Select the second SDR, select scan channels or a fixed channel, and click **Save and start**. Then click **Audio: off** to enable listening. Audio plays through the browser device speakers/headphones, not the Raspberry Pi audio output. Adjust **Volume**; 0% mutes playback. Audio is off on page load and requires a click.
 
-The browser receives live mono 16 kHz audio from the same receiver feed used for ATIS decoding. Receiver squelch applies to both. Turning listening off or changing volume does not stop decoding, scanning, or AIS Auto. Brief network interruptions reconnect automatically, without replaying a recording. The live buffer is bounded to one second of returned audio, with no audio files recorded. Browser background suspension can require another click on Audio.
+The browser receives live mono 16 kHz audio from the same receiver feed used
+for ATIS decoding. A separate squelch-gated feed keeps up to four recent
+transmissions (maximum two minutes each) in memory and offers WAV replay after
+the signal ends. Recordings are discarded when the Bridge process restarts;
+they are not written to disk. Turning live listening off does not stop
+decoding, scanning or recording. Browser background suspension can require
+another click on Audio.
 
-Validation includes a synthetic UDP tone through the receiver, HTTP PCM endpoint and decoder input, plus JavaScript playback/volume/stop tests. Audible reception from a real dongle still needs the Raspberry Pi test.
+### Smart Gain and Marine channel list
+
+Smart Gain briefly probes up to twelve selected channels with the second
+receiver, chooses one supported gain step between 0 and 25.4 dB and holds it
+fixed while receiving. When the probe cannot run or finds no clear signal, it
+uses the conservative 12.5 dB reference. Select Manual to set a different
+fixed tuner gain. The Marine channel workbook is available from **Marine
+channel list**; an SDRCC workbook can also be imported, with Aviation rows
+ignored and Marine channels retained.
+
+### Stable and beta updates
+
+Stable follows `main`; Beta follows `develop`. Selecting a channel saves that
+preference independently from the receiver configuration. Installing a beta
+or stable update does not replace the selected RTL-SDR, scan mode, channel
+selections, gain, squelch or AIS viewer settings. The updater only accepts
+those two repository branches, verifies the downloaded source against the
+branch's SHA-256 manifest, keeps a file backup and runs an HTTP health check
+before marking a channel installed. An explicit switch between Stable and Beta
+can install the selected branch even when its version is older, provided that
+branch contains the new update manifest. Stable 0.1.8 predates this updater;
+returning to that release requires its manual installer until main is promoted. Older releases
+within the currently installed channel remain blocked.
+
+The installer preserves the existing Bridge configuration, sets up the
+RTL-SDR Airband runtime, installs the systemd service and registers the
+restricted updater helper. A clean Raspberry Pi OS installation and real USB
+reception still need a hardware test.
+
+Validation includes a synthetic UDP tone through the receiver, the HTTP audio
+endpoint, channel migration, Smart Gain calculations, bounded replay storage,
+spreadsheet import and dashboard controls. Real RTL-SDR reception still needs
+a hardware test.
 
 ## AIS retention window (0.1.8)
 
@@ -100,9 +145,9 @@ unvalidated or stale records remain rejected. The Bridge uses a 30-minute AIS fr
 AIS-catcher retention window. Foreign call signs are not guessed, and a
 rejected or ambiguous standard match is never bypassed.
 
-Update an existing installation with `git pull --ff-only origin main` followed
-by `sudo ./install.sh` from its checkout. Live reception needs Marcel's test;
-the regression fixture uses the captured AIS data and a reconstructed ATIS code.
+Routine updates are available from **Bridge updates** in the dashboard. To
+install the beta branch manually, check out `develop` before running
+`sudo ./install.sh`; `main` remains the stable branch.
 
 ## Receiver lifecycle fix (0.1.5)
 
@@ -112,14 +157,14 @@ The Bridge runs RTLSDR-Airband with `-F`, keeping it in the foreground without t
 
 The installer now includes the required LAME/libshout development libraries, grants the service access via plugdev and common RTL2832U udev rules, fixes config-directory ownership, preserves existing settings, excludes checkout/build caches, restarts the installed service and checks its version through HTTP. The Airband build uses two jobs and explicitly enables RTL-SDR/NFM while disabling unused optional backends. Existing rtl_airband installations are reused.
 
-Validation: run `python scripts/validate_install_workflow.py` in a disposable root test environment. It executes first install, reinstall and installation from the installed directory with real wheel installation, configuration and dashboard startup. apt, CMake/git, users/ownership, udev and systemd are simulated; this is not a clean Raspberry Pi OS or native C++ build test. Native package installation is blocked in the development environment. The full Raspberry Pi OS 64-bit installation, USB access and reception remain hardware validation steps.
-
-To retry after a failed installation:
+To retry a failed installation from a source checkout:
 
 ```bash
 cd ~/AIS-ATIS-Bridge
 git pull --ff-only origin main
 sudo ./install.sh
 ```
+
+For Beta, check out `develop` and use `git pull --ff-only origin develop`.
 
 If you edited tracked installer files locally, preserve those changes before pulling. The installer does not install or restart AIS-catcher itself.

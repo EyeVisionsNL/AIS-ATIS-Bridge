@@ -25,6 +25,9 @@ def test_squelch_save_reload_and_receiver_config(tmp_path, monkeypatch, tuning, 
         rendered = ReceiverRuntime.render_airband_config(start.call_args.args[0])
         assert ("squelch_threshold = -47;" in rendered) == (mode == "manual")
         assert ("squelch_snr_threshold = 4.0;" in rendered) == (mode == "auto")
+        assert "gain = 12.5;" in rendered
+        assert "dest_port = 49555;" in rendered and "continuous = true;" in rendered
+        assert "dest_port = 49556;" in rendered and "continuous = false;" in rendered
 
 
 @pytest.mark.parametrize("threshold", [0, -101, -47.5, "NaN", None])

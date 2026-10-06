@@ -1,19 +1,120 @@
 from __future__ import annotations
-import json, os
+
+import json
+import os
 from copy import deepcopy
 from pathlib import Path
 from typing import Any
 
-DEFAULT_CHANNELS=[("ch16_nood","CH16 Nood/Oproep",156.800,False),("ch13_brug","CH13 Brug/Schip",156.650,False),("ch11_vts","CH11 VTS",156.550,False),("ch14_vts","CH14 VTS",156.700,False),("ch12_haven","CH12 Haven",156.600,False),("ch10_werk","CH10 Werk",156.500,False),("ch09_oproep","CH09 Oproep",156.450,False),("ch08_werk","CH08 Werk",156.400,True),("ch06_sleep","CH06 Sleep",156.300,False),("v01_maasap","V01 Maasmond Approach",160.650,True),("v02_maaspl","V02 Maasvlakte Pilot",160.700,True),("v03_maasmd","V03 Maasmond",160.750,True),("v05_rozbg","V05 Rozenburg",160.850,True),("v60_waalh","V60 Waalhaven",160.625,True),("v61_botlek","V61 Botlek",160.675,True),("v62_oudem","V62 Oude Maas",160.725,True),("v63_eemhv","V63 Eemhaven",160.775,True),("v65_rozbg2","V65 Rozenburg",160.875,True),("v66_europt","V66 Europoort",160.925,True),("v79_dordr","V79 Dordrecht",161.575,True),("v80_maassl","V80 Maassluis",161.625,True),("v81_maasbr","V81 Maasbruggen",161.675,True)]
-DEFAULTS={"receiver":"","tuning_mode":"scan","selected_channel_id":"v61_botlek","channel_bank":"rotterdam_port","channels":[{"id":i,"label":n,"frequency_mhz":f,"scan_enabled":e} for i,n,f,e in DEFAULT_CHANNELS],"gain_mode":"auto","gain_db":20.7,"squelch_mode":"auto","squelch_threshold_dbfs":-47,"scan_interval_ms":200,"ppm":0,"ais_ships_url":"http://127.0.0.1:8119/ships.json","ais_viewer_url":"http://127.0.0.1:8119/","web_host":"0.0.0.0","web_port":8120}
+CHANNEL_MASTER_VERSION = 2
+CHANNEL_MASTER_PATH = Path(__file__).with_name("static") / "rotterdam-port-channels.json"
 
-def path()->Path: return Path(os.environ.get("AIS_ATIS_CONFIG","/etc/ais-atis-bridge/config.json"))
-def load()->dict[str,Any]:
-    result=deepcopy(DEFAULTS)
+
+def _master_channels() -> list[dict[str, Any]]:
+    rows = json.loads(CHANNEL_MASTER_PATH.read_text(encoding="utf-8"))
+    return [{
+        "id": str(row["id"]),
+        "label": str(row["label"]),
+        "frequency_mhz": round(float(row["frequency_mhz"]), 6),
+        "scan_enabled": bool(row.get("scan_enabled")),
+    } for row in rows]
+
+
+DEFAULT_CHANNELS = _master_channels()
+DEFAULTS = {
+    "receiver": "", "tuning_mode": "scan", "selected_channel_id": "vhf61",
+    "channel_bank": "rotterdam_port", "channels": DEFAULT_CHANNELS,
+    "channel_master_version": CHANNEL_MASTER_VERSION,
+    "gain_mode": "smart", "gain_db": 12.5, "squelch_mode": "auto",
+    "squelch_threshold_dbfs": -47, "scan_interval_ms": 200, "ppm": 0,
+    "ais_ships_url": "http://127.0.0.1:8119/ships.json",
+    "ais_viewer_url": "http://127.0.0.1:8119/", "web_host": "0.0.0.0",
+    "web_port": 8120,
+}
+
+
+def path() -> Path:
+    return Path(os.environ.get("AIS_ATIS_CONFIG", "/etc/ais-atis-bridge/config.json"))
+
+
+def _preserve_user_channels(raw: dict[str, Any]) -> dict[str, Any]:
+    """Upgrade old Rotterdam banks by frequency while retaining user choices."""
     try:
-        raw=json.loads(path().read_text(encoding="utf-8"))
-        if isinstance(raw,dict): result.update(raw)
-    except (OSError,ValueError,TypeError): pass
+        old_channels = raw.get("channels")
+        if not isinstance(old_channels, list):
+            return raw
+        by_frequency = {}
+        selected_frequency = None
+        for item in old_channels:
+            if not isinstance(item, dict):
+                continue
+            try:
+                frequency = round(float(item.get("frequency_mhz")), 6)
+            except (TypeError, ValueError):
+                continue
+            by_frequency[frequency] = item
+            if item.get("id") == raw.get("selected_channel_id"):
+                selected_frequency = frequency
+
+        merged = []
+        master_frequencies = set()
+        used_ids = set()
+        for master in _master_channels():
+            frequency = master["frequency_mhz"]
+            prior = by_frequency.get(frequency)
+            row = dict(master)
+            if prior is not None:
+                row["scan_enabled"] = bool(prior.get("scan_enabled"))
+            merged.append(row)
+            master_frequencies.add(frequency)
+            used_ids.add(row["id"])
+
+        # Imported/custom channels remain available if they are not in the new
+        # Marine master list. A matching frequency uses the canonical master ID.
+        for item in old_channels:
+            if not isinstance(item, dict):
+                continue
+            try:
+                frequency = round(float(item.get("frequency_mhz")), 6)
+            except (TypeError, ValueError):
+                continue
+            if frequency in master_frequencies:
+                continue
+            channel_id = str(item.get("id") or "").strip()
+            if not channel_id or channel_id in used_ids:
+                continue
+            merged.append({
+                "id": channel_id,
+                "label": str(item.get("label") or "").strip(),
+                "frequency_mhz": frequency,
+                "scan_enabled": bool(item.get("scan_enabled")),
+            })
+            used_ids.add(channel_id)
+
+        upgraded = dict(raw)
+        upgraded["channels"] = merged
+        upgraded["channel_bank"] = "rotterdam_port"
+        upgraded["channel_master_version"] = CHANNEL_MASTER_VERSION
+        if selected_frequency is not None:
+            selected = next((row["id"] for row in merged
+                             if row["frequency_mhz"] == selected_frequency), None)
+            if selected:
+                upgraded["selected_channel_id"] = selected
+        return upgraded
+    except (OSError, ValueError, KeyError, TypeError):
+        return raw
+
+
+def load() -> dict[str, Any]:
+    result = deepcopy(DEFAULTS)
+    try:
+        raw = json.loads(path().read_text(encoding="utf-8"))
+        if isinstance(raw, dict):
+            if int(raw.get("channel_master_version", 0) or 0) < CHANNEL_MASTER_VERSION:
+                raw = _preserve_user_channels(raw)
+            result.update(raw)
+    except (OSError, ValueError, TypeError):
+        pass
     return validate(result)
 
 def validate(raw:dict[str,Any])->dict[str,Any]:
@@ -33,7 +134,12 @@ def validate(raw:dict[str,Any])->dict[str,Any]:
         ids.add(channel_id); frequencies.add(frequency); channels.append({"id":channel_id,"label":label,"frequency_mhz":frequency,"scan_enabled":bool(item.get("scan_enabled"))})
     if result["tuning_mode"]=="scan" and not any(x["scan_enabled"] for x in channels): raise ValueError("Enable at least one scan channel")
     selected=str(raw.get("selected_channel_id") or ""); result["selected_channel_id"]=selected if selected in ids else channels[0]["id"]; result["channels"]=channels
-    result["gain_mode"]="manual" if raw.get("gain_mode")=="manual" else "auto"; result["gain_db"]=max(0.0,min(49.6,float(raw.get("gain_db",20.7)))); result["ppm"]=max(-200,min(200,int(raw.get("ppm",0))))
+    # Smart Gain probes once before rtl_airband starts, then holds one fixed
+    # tuner gain for the whole receiver session.
+    result["gain_mode"]="manual" if str(raw.get("gain_mode") or "").lower()=="manual" else "smart"
+    try: result["gain_db"]=max(0.0,min(49.6,float(raw.get("gain_db",12.5))))
+    except (ValueError,TypeError) as error: raise ValueError("Gain must be a number from 0 to 49.6 dB") from error
+    result["ppm"]=max(-200,min(200,int(raw.get("ppm",0))))
     mode=raw.get("squelch_mode","auto")
     if mode not in ("auto","manual"): raise ValueError("Invalid squelch mode")
     try: threshold=float(raw.get("squelch_threshold_dbfs",-47))
@@ -48,7 +154,9 @@ def validate(raw:dict[str,Any])->dict[str,Any]:
         value=str(raw.get(key) or DEFAULTS[key]).strip()
         if not value.startswith(("http://127.0.0.1:","http://localhost:")): raise ValueError(f"{key} must use localhost")
         result[key]=value
-    result["web_host"]=str(raw.get("web_host") or DEFAULTS["web_host"]); result["web_port"]=int(raw.get("web_port") or 8120); return result
+    result["web_host"]=str(raw.get("web_host") or DEFAULTS["web_host"]); result["web_port"]=int(raw.get("web_port") or 8120)
+    result["channel_master_version"]=CHANNEL_MASTER_VERSION
+    return result
 
 def save(raw:dict[str,Any])->dict[str,Any]:
     clean=validate(raw); target=path(); target.parent.mkdir(parents=True,exist_ok=True); temporary=target.with_suffix(".tmp")

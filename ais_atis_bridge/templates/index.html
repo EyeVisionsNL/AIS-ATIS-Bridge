@@ -3,18 +3,22 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>AIS-ATIS Bridge</title>
-  <link rel="stylesheet" href="/static/style.css">
+  <title>AIS-ATIS Bridge · Marine Traffic</title>
+  <link rel="stylesheet" href="/static/style.css?v=0.1.9">
 </head>
 <body>
 <main class="shell">
   <header class="topbar">
     <div class="brand-copy">
-      <p class="eyebrow">EyeVisionsNL · AIS-catcher companion</p>
-      <h1>AIS-ATIS Bridge</h1>
-      <p class="tagline">Listen · Decode · Correlate · Follow</p>
+      <p class="eyebrow">EyeVisionsNL <span>·</span> ROTTERDAM MARINE TRAFFIC</p>
+      <h1>AIS-ATIS <span>Bridge</span></h1>
+      <p class="tagline">Marine voice · ATIS identity · AIS position</p>
+      <div class="hero-tags"><span>VHF / NFM</span><span>SMART GAIN</span><span>LIVE AIS CORRELATION</span></div>
     </div>
-    <span id="state" class="status-badge" data-state="loading">LOADING</span>
+    <div class="hero-side">
+      <div class="radar-art" aria-hidden="true"><span class="radar-sweep"></span><i class="radar-dot dot-one"></i><i class="radar-dot dot-two"></i><i class="radar-dot dot-three"></i><span class="radar-ship">⚓</span></div>
+      <div class="hero-state"><span>RECEIVER</span><strong id="state" class="status-badge" data-state="loading">LOADING</strong></div>
+    </div>
   </header>
 
   <section class="dashboard-grid">
@@ -64,9 +68,10 @@
         <div class="control-section rf-section">
           <div class="section-title"><strong>RF settings</strong><span>Receiver gain, squelch and scan timing</span></div>
           <div class="two-col">
-            <label>Gain<select id="gain_mode"><option value="auto">Automatic</option><option value="manual">Manual</option></select></label>
-            <label>Gain dB<input id="gain_db" type="number" min="0" max="49.6" step="0.1"></label>
+            <label>Gain mode<select id="gain_mode"><option value="smart">Smart Gain</option><option value="manual">Manual</option></select></label>
+            <label id="gain-value-wrap" class="gain-value-wrap">Manual gain dB<input id="gain_db" type="number" min="0" max="49.6" step="0.1"></label>
           </div>
+          <p id="smart-gain-status" class="hint gain-status">Smart Gain checks up to 12 selected channels, then holds one safe fixed gain.</p>
           <div class="two-col">
             <label>Squelch<select id="squelch_mode"><option value="auto">Automatic (noise tracking)</option><option value="manual">Manual (dBFS)</option></select></label>
             <label>Threshold dBFS<input id="squelch_threshold_dbfs" type="number" min="-100" max="-1" step="1" value="-47" required disabled></label>
@@ -89,18 +94,33 @@
           <button class="button danger" id="stop" type="button">■ Stop receiver</button>
         </div>
         <div class="action-grid secondary-actions">
-          <a class="button secondary" href="/api/channels/export.xlsx">⇩ Export Excel</a>
+          <a class="button secondary" href="/static/rotterdam-port-channels.xlsx" download>⇩ Marine channel list</a>
+          <a class="button secondary" href="/api/channels/export.xlsx">⇩ Export current</a>
           <label class="button secondary file-button">⇧ Import Excel<input id="xlsx" type="file" accept=".xlsx" hidden></label>
         </div>
         <p id="message" class="action-message" aria-live="polite"></p>
+
+        <section class="update-panel" aria-labelledby="update-heading">
+          <div class="section-title"><strong id="update-heading">Bridge updates</strong><span>Choose a release channel</span></div>
+          <label class="channel-switch"><span><strong id="channel-label">Stable</strong><small id="channel-description">Recommended release</small></span><input id="beta-toggle" type="checkbox" aria-label="Use beta updates"><i></i></label>
+          <p id="update-versions" class="update-versions">Installed version · checking channel</p>
+          <div class="action-grid update-actions"><button id="check-update" class="button secondary" type="button">↻ Check for updates</button><button id="install-update" class="button accent" type="button" disabled>Install update</button></div>
+          <p id="update-message" class="action-message" aria-live="polite">Stable updates keep the main release. Beta follows the develop branch.</p>
+        </section>
       </form>
     </article>
   </section>
 
+  <section class="card recordings-card" aria-labelledby="recordings-heading">
+    <div class="card-heading"><div><span class="section-kicker">Squelch-gated capture</span><h2 id="recordings-heading">Recent Marine transmissions</h2></div><span class="recording-limit">LATEST 4 · IN-MEMORY</span></div>
+    <p id="recordings-message" class="hint">Recordings appear after a channel opens squelch and are kept temporarily in memory.</p>
+    <div id="recordings" class="recordings-list" role="list"></div>
+  </section>
+
   <footer>Read-only AIS correlation · Never use for navigation or safety</footer>
 </main>
-<script src="/static/audio.js"></script>
-<script src="/static/map.js"></script>
-<script src="/static/app.js"></script>
+<script src="/static/audio.js?v=0.1.9"></script>
+<script src="/static/map.js?v=0.1.9"></script>
+<script src="/static/app.js?v=0.1.9"></script>
 </body>
 </html>

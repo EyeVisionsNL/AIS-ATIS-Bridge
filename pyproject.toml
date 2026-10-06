@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ais-atis-bridge"
-version = "0.1.8"
-description = "Marine ATIS decoder and AIS-catcher companion for a second RTL-SDR"
+version = "0.1.9"
+description = "Marine ATIS decoder and AIS-catcher companion with Smart Gain and replay"
 requires-python = ">=3.11"
 dependencies = ["Flask>=3.0,<4", "numpy>=1.24,<3", "openpyxl>=3.1,<4"]
 
@@ -20,7 +20,7 @@ include = ["ais_atis_bridge", "ais_atis_bridge.*"]
 namespaces = false
 
 [tool.setuptools.package-data]
-ais_atis_bridge = ["templates/*.html", "static/*.css", "static/*.js"]
+ais_atis_bridge = ["templates/*.html", "static/*.css", "static/*.js", "static/*.json", "static/*.xlsx"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
