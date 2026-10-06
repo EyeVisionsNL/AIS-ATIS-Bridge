@@ -17,6 +17,7 @@ import tarfile
 import tempfile
 import time
 from urllib.request import Request, urlopen
+from uuid import uuid4
 
 
 REPOSITORY = "EyeVisionsNL/AIS-ATIS-Bridge"
@@ -86,6 +87,7 @@ def validate_target_version(branch: str, version: str, installed_version: str) -
 
 
 def fetch(url: str, maximum: int) -> bytes:
+    url += ("&" if "?" in url else "?") + "check=" + uuid4().hex
     request = Request(url, headers={"User-Agent": "AIS-ATIS-Bridge-updater", "Cache-Control": "no-cache"})
     with urlopen(request, timeout=30) as response:
         data = response.read(maximum + 1)

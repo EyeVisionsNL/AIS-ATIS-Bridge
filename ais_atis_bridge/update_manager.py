@@ -146,7 +146,7 @@ def check_remote_version(timeout: float = 5.0) -> dict:
             latest = response.read(256).decode("utf-8", "replace").strip()
         if version_key(latest) is None:
             raise ValueError(f"Unexpected remote VERSION value: {latest!r}")
-        manifest_url = REMOTE_VERSION.format(channel=selected).rsplit("/", 1)[0] + "/scripts/install/update_manifest.json"
+        manifest_url = REMOTE_VERSION.format(channel=selected).rsplit("/", 1)[0] + "/scripts/install/update_manifest.json?check=" + uuid4().hex
         try:
             with urlopen(Request(manifest_url, headers={"User-Agent": "AIS-ATIS-Bridge-update-check"}), timeout=timeout) as response:
                 manifest = json.loads(response.read(1024 * 1024))
