@@ -34,7 +34,50 @@ RTLSDR-Airband is built from pinned commit
 - a second RTL-SDR that is not used by AIS-catcher
 - Debian/Raspberry Pi OS 64-bit or Ubuntu
 
-## Install
+## Develop / beta 0.1.9
+
+This beta brings the standalone Bridge up to the Marine Traffic feature set:
+Smart Gain, the latest four recordings with channel names and replay, the
+updated Excel Marine channel list, an SDRCC-style dashboard with a radar
+banner, and an updater with backup and rollback.
+
+### Upgrade an existing checkout
+
+Run the installer once to install the new updater as well:
+
+```bash
+cd ~/AIS-ATIS-Bridge
+git fetch origin
+git switch develop
+git pull --ff-only origin develop
+sudo ./install.sh
+```
+
+Existing receiver and channel settings are preserved. Future compatible beta
+updates can be installed through **Bridge updates** in the dashboard.
+
+### Fresh beta installation
+
+```bash
+git clone --branch develop https://github.com/EyeVisionsNL/AIS-ATIS-Bridge.git
+cd AIS-ATIS-Bridge
+sudo ./install.sh
+```
+
+### Validation status
+
+85 automated Python tests and the browser-control tests passed. The isolated
+installer tests covered a first installation, reinstalling while preserving
+configuration, and reinstalling from the installed directory. Update and
+rollback behavior were tested with simulated host services. Real RTL-SDR
+reception and native systemd operation still require a hardware test.
+
+At publication on 6 October 2026, the connected GitHub repository showed
+0.1.9, but the direct download endpoint still returned an older version in
+the test environment. A complete online update has therefore not yet been
+confirmed. Stable 0.1.8 does not include the new updater manifest.
+
+## Install stable
 
 ```bash
 git clone https://github.com/EyeVisionsNL/AIS-ATIS-Bridge.git

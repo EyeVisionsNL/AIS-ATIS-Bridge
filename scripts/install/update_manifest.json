@@ -1,7 +1,7 @@
 {
   "files": {
     "LICENSE": "89c9ffb0fd2abbc39441ade154dfc4e6a69d7ff679cd69556ef94f5ae9a14cbf",
-    "README.md": "2fb58d1a4e9ea6be3f0543fee85479f94dd6bdbe18b79f1d29a524ff402ad669",
+    "README.md": "1ab9d190c78bd4cdce68f32cea8a92911a940047cdefb1fc6611f9a91eb5c037",
     "RELEASE_CHANNEL": "239a504b8fa8af02038344df4f2d489e80c8307d42deb37ee7ca754385a42003",
     "VERSION": "e358d84552808a5c0bd6679d690c283b938ebe15c2bd843c898681d093213107",
     "ais_atis_bridge/__init__.py": "f09c6cf64b35b7ab1502cd118dccaa5f4ba4dafed515f4ae04644676088e4a23",
