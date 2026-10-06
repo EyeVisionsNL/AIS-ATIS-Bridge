@@ -3,6 +3,8 @@ let loaded = false;
 let channelConfig = [];
 let recordingsSignature = '';
 let updateState = null;
+let updateRequestError = '';
+let updateRequestPending = false;
 
 async function json(url, options) {
   const response = await fetch(url, options);
@@ -105,7 +107,7 @@ function renderUpdate(data) {
   updateState = data;
   const beta = data.source_channel === 'develop';
   const worker = data.worker || {};
-  const busy = ['queued', 'starting', 'downloading', 'validating', 'backing_up', 'installing', 'restarting'].includes(worker.state);
+  const busy = updateRequestPending || ['queued', 'starting', 'downloading', 'validating', 'backing_up', 'installing', 'restarting'].includes(worker.state);
   $('beta-toggle').checked = beta;
   $('beta-toggle').disabled = busy;
   $('check-update').disabled = busy;
@@ -113,7 +115,8 @@ function renderUpdate(data) {
   $('channel-description').textContent = beta ? 'Early features from develop' : 'Recommended release from main';
   $('update-versions').textContent = `Installed ${data.installed_version || '—'} · ${data.installed_channel === 'develop' ? 'Beta' : 'Stable'}${data.latest_version ? ` · ${beta ? 'Beta' : 'Stable'} ${data.latest_version}` : ''}`;
   $('install-update').disabled = busy || !data.update_available;
-  if (busy) $('update-message').textContent = worker.message || 'Installing update…';
+  if (updateRequestError) $('update-message').textContent = updateRequestError;
+  else if (busy) $('update-message').textContent = worker.message || 'Installing update…';
   else if ((worker.state === 'failed' || worker.state === 'interrupted') && worker.branch === data.source_channel) $('update-message').textContent = worker.message || 'The last update did not complete.';
   else if (worker.state === 'complete' && worker.branch === data.source_channel && data.source_channel === data.installed_channel) $('update-message').textContent = `Updated to ${worker.installed_version || data.installed_version} on ${beta ? 'Beta' : 'Stable'}.`;
   else if (data.check_error) $('update-message').textContent = `Could not check for updates: ${data.check_error}`;
@@ -126,11 +129,13 @@ function renderUpdate(data) {
 }
 
 async function checkForUpdates() {
+  updateRequestError = '';
+  updateRequestPending = true;
   $('check-update').disabled = true;
   $('update-message').textContent = 'Checking GitHub for the selected release channel…';
   try { renderUpdate(await json('/api/update/status?refresh=1')); }
-  catch (error) { $('update-message').textContent = error.message; }
-  finally { $('check-update').disabled = false; }
+  catch (error) { updateRequestError = error.message; $('update-message').textContent = updateRequestError; }
+  finally { updateRequestPending = false; if (updateState) renderUpdate(updateState); }
 }
 
 async function pollUpdate() {
@@ -234,25 +239,31 @@ $('gain_mode').addEventListener('change', syncGain);
 $('scan_speed').addEventListener('input', syncScanSpeed);
 $('check-update').addEventListener('click', checkForUpdates);
 $('beta-toggle').addEventListener('change', async () => {
+  updateRequestError = '';
+  updateRequestPending = true;
   $('update-message').textContent = 'Saving channel and checking GitHub…';
   try {
     renderUpdate(await json('/api/update/channel', {
       method: 'POST', headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({channel: $('beta-toggle').checked ? 'develop' : 'main'}),
     }));
-  } catch (error) { $('update-message').textContent = error.message; }
+  } catch (error) { updateRequestError = error.message; $('update-message').textContent = updateRequestError; }
+  finally { updateRequestPending = false; if (updateState) renderUpdate(updateState); }
 });
 $('install-update').addEventListener('click', async () => {
-  if (!updateState?.update_available) return;
+  if (!updateState?.update_available || updateRequestPending) return;
   const channel = updateState.source_channel === 'develop' ? 'Beta' : 'Stable';
   if (!window.confirm(`Install ${channel} ${updateState.latest_version}? The Bridge service will restart. Your receiver and channel settings will be kept.`)) return;
+  updateRequestError = '';
+  updateRequestPending = true;
   $('install-update').disabled = true;
   $('update-message').textContent = 'Starting the verified update worker…';
   try {
     const result = await json('/api/update/install', {method: 'POST'});
     $('update-message').textContent = result.message || 'Update worker started.';
     pollUpdate();
-  } catch (error) { $('update-message').textContent = error.message; }
+  } catch (error) { updateRequestError = error.message; $('update-message').textContent = updateRequestError; }
+  finally { updateRequestPending = false; if (updateState) renderUpdate(updateState); }
 });
 refresh();
 setInterval(refresh, 2000);

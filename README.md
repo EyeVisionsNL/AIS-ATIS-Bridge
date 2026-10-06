@@ -34,6 +34,28 @@ RTLSDR-Airband is built from pinned commit
 - a second RTL-SDR that is not used by AIS-catcher
 - Debian/Raspberry Pi OS 64-bit or Ubuntu
 
+## Update startup fix (0.1.12)
+
+The service's `NoNewPrivileges=true` setting blocked the restricted sudo
+updater helper. Version 0.1.12 allows that existing no-argument helper to run;
+the Bridge still runs as `aisatis`, and the other filesystem protections remain.
+Update errors now remain visible during automatic dashboard refreshes.
+
+If the update button reports sudo's "no new privileges" flag, install this
+repair once from the terminal, because the blocked updater cannot repair its
+own service settings:
+
+```bash
+cd ~/AIS-ATIS-Bridge
+git fetch origin
+git switch develop
+git pull --ff-only origin develop
+sudo ./install.sh
+```
+
+Then refresh the dashboard. Subsequent compatible beta releases use the update
+button again. Native service elevation still needs validation on the target Pi.
+
 ## Develop / beta 0.1.9
 
 This beta brings the standalone Bridge up to the Marine Traffic feature set:

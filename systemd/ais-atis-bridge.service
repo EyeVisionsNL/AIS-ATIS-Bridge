@@ -16,7 +16,9 @@ Environment=AIS_ATIS_UPDATE_STATUS=/var/lib/ais-atis-bridge/update-status.json
 ExecStart=/opt/ais-atis-bridge/venv/bin/ais-atis-bridge
 Restart=on-failure
 RestartSec=3
-NoNewPrivileges=true
+# The exact no-argument sudo helper starts an isolated root update worker.
+# NoNewPrivileges=true blocks sudo even with the restricted NOPASSWD rule.
+NoNewPrivileges=false
 PrivateTmp=true
 ProtectSystem=strict
 ProtectHome=true
