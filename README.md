@@ -18,7 +18,7 @@ local `ships.json` endpoint.
 - fixed-channel and multi-channel NFM scanning through RTLSDR-Airband
 - one-shot Smart Gain probe followed by a bounded, fixed tuner gain
 - up to four recent squelch-open Marine recordings, held in memory
-- the updated SDRCC Marine workbook (59 valid VHF00–VHF88 entries), with Excel import and export
+- the SDRCC-aligned Marine Voice workbook (133 unique analogue voice carriers), with Excel import and export
 - RAINWAT ATIS validation (10-unit symbols, time diversity and ECC)
 - exact, fail-closed ATIS-to-AIS matching
 - SDRCC-inspired dashboard, update channel selector and verified updater
@@ -33,6 +33,20 @@ RTLSDR-Airband is built from pinned commit
 - a running AIS-catcher viewer exposing `http://127.0.0.1:8119/ships.json`
 - a second RTL-SDR that is not used by AIS-catcher
 - Debian/Raspberry Pi OS 64-bit or Ubuntu
+
+## Marine voice catalog (0.1.13)
+
+Version 0.1.13 aligns AIS-ATIS Bridge with SDRCC's voice-only Dutch Marine
+catalog. The maintained bank contains 133 unique analogue receive carriers,
+including the Dutch supplementary/private channels and both relevant sides of
+duplex voice channels. VHF55L/56L are supported by widening the accepted Marine
+range to 155.775–162.600 MHz.
+
+Data-only carriers are deliberately excluded from Voice: AIS1/AIS2, VHF70 DSC,
+ASM1/ASM2 and the VDES/satellite allocations on 24/25/26 and 84/85/86. AIS
+continues to be handled by AIS-catcher. Existing installations migrate by
+frequency, retain scan choices and custom voice channels, and remove obsolete
+data-only entries.
 
 ## Update startup fix (0.1.12)
 
