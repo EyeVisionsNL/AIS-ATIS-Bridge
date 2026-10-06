@@ -1,7 +1,7 @@
 # AIS-ATIS Bridge
 
 Standalone Marine ATIS decoder and AIS-catcher companion for a second RTL-SDR.
-Version 0.1.9 adds SDRCC-style Smart Gain, recent Marine audio replays and a
+Stable version 0.1.12 includes SDRCC-style Smart Gain, recent Marine audio replays and a
 stable/beta updater.
 
 The first RTL-SDR remains exclusively owned by AIS-catcher. AIS-ATIS Bridge lets
@@ -48,17 +48,17 @@ own service settings:
 ```bash
 cd ~/AIS-ATIS-Bridge
 git fetch origin
-git switch develop
-git pull --ff-only origin develop
+git switch main
+git pull --ff-only origin main
 sudo ./install.sh
 ```
 
-Then refresh the dashboard. Subsequent compatible beta releases use the update
-button again. Native service elevation still needs validation on the target Pi.
+Then refresh the dashboard. Subsequent compatible releases use the update
+button again. The user confirmed the repaired release working on their Raspberry Pi.
 
-## Develop / beta 0.1.9
+## Stable 0.1.12
 
-This beta brings the standalone Bridge up to the Marine Traffic feature set:
+This release brings the standalone Bridge up to the Marine Traffic feature set:
 Smart Gain, the latest four recordings with channel names and replay, the
 updated Excel Marine channel list, an SDRCC-style dashboard with a radar
 banner, and an updater with backup and rollback.
@@ -70,18 +70,18 @@ Run the installer once to install the new updater as well:
 ```bash
 cd ~/AIS-ATIS-Bridge
 git fetch origin
-git switch develop
-git pull --ff-only origin develop
+git switch main
+git pull --ff-only origin main
 sudo ./install.sh
 ```
 
-Existing receiver and channel settings are preserved. Future compatible beta
+Existing receiver and channel settings are preserved. Future compatible
 updates can be installed through **Bridge updates** in the dashboard.
 
-### Fresh beta installation
+### Fresh stable installation
 
 ```bash
-git clone --branch develop https://github.com/EyeVisionsNL/AIS-ATIS-Bridge.git
+git clone --branch main https://github.com/EyeVisionsNL/AIS-ATIS-Bridge.git
 cd AIS-ATIS-Bridge
 sudo ./install.sh
 ```
@@ -94,10 +94,8 @@ configuration, and reinstalling from the installed directory. Update and
 rollback behavior were tested with simulated host services. Real RTL-SDR
 reception and native systemd operation still require a hardware test.
 
-At publication on 6 October 2026, the connected GitHub repository showed
-0.1.9, but the direct download endpoint still returned an older version in
-the test environment. A complete online update has therefore not yet been
-confirmed. Stable 0.1.8 does not include the new updater manifest.
+Version 0.1.12 was approved for Stable after the user confirmed it working on
+their Raspberry Pi. The main branch now includes the updater manifest.
 
 ## Install stable
 
@@ -179,9 +177,9 @@ those two repository branches, verifies the downloaded source against the
 branch's SHA-256 manifest, keeps a file backup and runs an HTTP health check
 before marking a channel installed. An explicit switch between Stable and Beta
 can install the selected branch even when its version is older, provided that
-branch contains the new update manifest. Stable 0.1.8 predates this updater;
-returning to that release requires its manual installer until main is promoted. Older releases
-within the currently installed channel remain blocked.
+branch contains the update manifest. Switching between Stable and Beta also
+works when both branches have the same version. Older releases within the
+currently installed channel remain blocked.
 
 The installer preserves the existing Bridge configuration, sets up the
 RTL-SDR Airband runtime, installs the systemd service and registers the
