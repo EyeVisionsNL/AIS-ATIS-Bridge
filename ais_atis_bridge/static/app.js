@@ -5,6 +5,10 @@ let recordingsSignature = '';
 let updateState = null;
 let updateRequestError = '';
 let updateRequestPending = false;
+let lastMatch = null;
+let shipPhotosEnabled = localStorage.getItem('aisAtisBridge.shipPhotos') === '1';
+let vesselPhotoMmsi = '';
+let vesselPhotoRequest = 0;
 
 async function json(url, options) {
   const response = await fetch(url, options);
@@ -35,6 +39,40 @@ function details(latest, match) {
   if (latest) rows.push(['ATIS code', latest.atis_code], ['Callsign', latest.callsign || '—'], ['Age', `${latest.age_seconds}s`]);
   if (match) rows.push(['AIS status', match.status], ['Ship', match.shipname || '—'], ['MMSI', match.mmsi || '—'], ['Position', match.latitude != null ? `${match.latitude}, ${match.longitude}` : '—']);
   return rows.map(([a, b]) => `<dt>${a}</dt><dd>${b}</dd>`).join('');
+}
+
+
+function renderPhotoToggle() {
+  $('ship-photos').textContent = shipPhotosEnabled ? 'Ship photos: on' : 'Ship photos: off';
+  $('ship-photos').setAttribute('aria-pressed', String(shipPhotosEnabled));
+}
+function clearVesselPhoto() {
+  vesselPhotoRequest += 1; vesselPhotoMmsi = '';
+  $('vessel-photo-card').hidden = true; $('vessel-photo').removeAttribute('src');
+}
+async function renderVesselPhoto(match) {
+  if (!shipPhotosEnabled) return;
+  const mmsi = String(match?.mmsi || '');
+  if (!match?.matched || !/^\d{9}$/.test(mmsi)) { clearVesselPhoto(); return; }
+  if (mmsi === vesselPhotoMmsi) return;
+  vesselPhotoMmsi = mmsi; const requestId = ++vesselPhotoRequest;
+  const name = String(match.shipname || match.callsign || ('MMSI ' + mmsi));
+  $('vessel-photo-card').hidden = false; $('vessel-photo').removeAttribute('src');
+  $('vessel-photo-name').textContent = name; $('vessel-photo-status').textContent = 'Searching vessel photo…';
+  try {
+    const result = await json('/api/vessel-photo?mmsi=' + encodeURIComponent(mmsi)
+      + '&shipname=' + encodeURIComponent(name) + '&imo=' + encodeURIComponent(match.imo || ''));
+    if (requestId !== vesselPhotoRequest || !shipPhotosEnabled) return;
+    if (!result.ok || !result.image_url) {
+      $('vessel-photo').removeAttribute('src');
+      $('vessel-photo-status').textContent = result.status === 'unavailable' ? 'Photo source temporarily unavailable.' : 'No vessel photo found.';
+      return;
+    }
+    $('vessel-photo').src = result.image_url; $('vessel-photo').alt = 'Photo of ' + name;
+    $('vessel-photo-status').textContent = [result.source, result.artist, result.license].filter(Boolean).join(' · ') || 'Wikimedia Commons';
+  } catch (_) {
+    if (requestId === vesselPhotoRequest) $('vessel-photo-status').textContent = 'Photo lookup failed.';
+  }
 }
 
 function renderState(state) {
@@ -93,6 +131,20 @@ function renderRecordings(items) {
       player.src = item.play_url;
       player.setAttribute('aria-label', `Play ${title.textContent}`);
       row.append(player);
+      const save = document.createElement('button');
+      save.type = 'button'; save.className = 'button secondary recording-save'; save.textContent = '💾 Save';
+      save.addEventListener('click', async () => {
+        save.disabled = true;
+        try {
+          const match = lastMatch?.matched ? lastMatch : {};
+          const result = await json('/api/recordings/' + encodeURIComponent(item.id) + '/save', {
+            method: 'POST', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({mmsi: match.mmsi || null, shipname: match.shipname || null, callsign: match.callsign || null, imo: match.imo || null}),
+          });
+          save.textContent = '✓ Saved'; $('recordings-message').textContent = 'Saved permanently as ' + result.filename;
+        } catch (error) { save.disabled = false; $('recordings-message').textContent = error.message; }
+      });
+      row.append(save);
     } else {
       const pending = document.createElement('span');
       pending.className = 'recording-pending';
@@ -154,6 +206,8 @@ async function refresh() {
     const data = await json('/api/status');
     const state = data.receiver;
     window.atisMap.update(data);
+    lastMatch = data.ais_match || null;
+    renderVesselPhoto(lastMatch);
     renderState(state.state);
     $('identity').textContent = state.latest?.atis_code || 'No validated ATIS received';
     $('details').innerHTML = details(state.latest, data.ais_match);
@@ -183,6 +237,14 @@ async function refresh() {
     window.atisMap.offline();
   }
 }
+
+renderPhotoToggle();
+$('ship-photos').addEventListener('click', () => {
+  shipPhotosEnabled = !shipPhotosEnabled;
+  localStorage.setItem('aisAtisBridge.shipPhotos', shipPhotosEnabled ? '1' : '0');
+  renderPhotoToggle();
+  if (!shipPhotosEnabled) clearVesselPhoto(); else renderVesselPhoto(lastMatch);
+});
 
 $('settings').addEventListener('submit', async event => {
   event.preventDefault();
