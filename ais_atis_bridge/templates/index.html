@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>AIS-ATIS Bridge · Marine Traffic</title>
-  <link rel="stylesheet" href="/static/style.css?v=0.1.15">
+  <link rel="stylesheet" href="/static/style.css?v=0.1.16">
 </head>
 <body>
 <main class="shell">
@@ -105,6 +105,7 @@
           <label class="compact-control" for="map-zoom"><span>Zoom</span><input id="map-zoom" type="number" min="3" max="18" step="1" value="14" aria-label="AIS map zoom level"></label>
           <button id="auto-map" class="button accent" type="button" aria-pressed="false" disabled>Auto: off</button>
           <button id="ship-photos" class="button secondary" type="button" aria-pressed="false">Ship photos: off</button>
+          <a id="google-images" class="button secondary" href="#" target="_blank" rel="noopener noreferrer" hidden>Google Images ↗</a>
         </div>
         <p id="map-message" class="hint" aria-live="polite">Waiting for a fresh ATIS/AIS match.</p>
         <div id="vessel-photo-card" class="vessel-photo-card" hidden><img id="vessel-photo" alt=""><div><strong id="vessel-photo-name">Matched vessel</strong><small id="vessel-photo-status">Searching vessel photo…</small></div></div>
@@ -123,8 +124,8 @@
 
   <footer>Read-only AIS correlation · Never use for navigation or safety</footer>
 </main>
-<script src="/static/audio.js?v=0.1.15"></script>
-<script src="/static/map.js?v=0.1.15"></script>
-<script src="/static/app.js?v=0.1.15"></script>
+<script src="/static/audio.js?v=0.1.16"></script>
+<script src="/static/map.js?v=0.1.16"></script>
+<script src="/static/app.js?v=0.1.16"></script>
 </body>
 </html>
