@@ -42,6 +42,14 @@ function details(latest, match) {
 }
 
 
+function updateGoogleImagesLink(match) {
+  const link = $('google-images'), mmsi = String(match?.mmsi || '');
+  if (!match?.matched || !/^\d{9}$/.test(mmsi)) { link.hidden = true; link.removeAttribute('href'); return; }
+  const parts = [match.shipname, match.imo ? ('IMO ' + match.imo) : '', 'MMSI ' + mmsi, 'ship'].filter(Boolean);
+  link.href = 'https://www.google.com/search?tbm=isch&q=' + encodeURIComponent(parts.join(' '));
+  link.hidden = false;
+}
+
 function renderPhotoToggle() {
   $('ship-photos').textContent = shipPhotosEnabled ? 'Ship photos: on' : 'Ship photos: off';
   $('ship-photos').setAttribute('aria-pressed', String(shipPhotosEnabled));
@@ -207,6 +215,7 @@ async function refresh() {
     const state = data.receiver;
     window.atisMap.update(data);
     lastMatch = data.ais_match || null;
+    updateGoogleImagesLink(lastMatch);
     renderVesselPhoto(lastMatch);
     renderState(state.state);
     $('identity').textContent = state.latest?.atis_code || 'No validated ATIS received';
