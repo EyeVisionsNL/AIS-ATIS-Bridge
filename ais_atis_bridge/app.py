@@ -5,7 +5,7 @@ import json
 import subprocess
 from flask import Response, Flask, jsonify, redirect, render_template, request, send_file, url_for
 
-from . import __version__, ais, config
+from . import __version__, ais, config, vessel_photo
 from .channel_xlsx import export_channels, import_channels
 from .receivers import inventory
 from .runtime import runtime
@@ -52,6 +52,25 @@ def create_app() -> Flask:
             return jsonify({"error": "Recording expired or is still in progress"}), 404
         return send_file(BytesIO(payload), mimetype="audio/wav", as_attachment=True,
                          download_name=f"marine-{recording_id[:8]}.wav", max_age=0)
+
+    @app.post("/api/recordings/<recording_id>/save")
+    def save_recording(recording_id: str):
+        payload = request.get_json(silent=True) or {}
+        result = runtime.recordings.save(recording_id, payload)
+        if result is None:
+            return jsonify({"ok": False, "error": "Recording expired or is still in progress"}), 404
+        return jsonify(result)
+
+    @app.get("/api/vessel-photo")
+    def vessel_photo_lookup():
+        try:
+            return jsonify(vessel_photo.lookup(
+                request.args.get("mmsi", ""),
+                request.args.get("shipname", ""),
+                request.args.get("imo", ""),
+            ))
+        except ValueError as error:
+            return jsonify({"ok": False, "status": "invalid", "error": str(error)}), 400
 
     @app.get("/api/update/status")
     def update_status():
