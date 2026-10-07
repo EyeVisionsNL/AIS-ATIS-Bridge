@@ -57,6 +57,23 @@ def match_atis(atis_code: str, payload: Any, max_age_seconds: float = 1800.0) ->
     if len(code) != 10 or not code.isdigit() or not code.startswith("9"):
         return result
     ships = _ships(payload)
+    callsign_count = sum(1 for ship in ships if str(ship.get("callsign") or "").strip())
+    validated_count = sum(1 for ship in ships if _number(ship.get("validated")) == 1)
+    fresh_count = sum(
+        1
+        for ship in ships
+        if (
+            (age := _number(ship.get("last_signal", ship.get("age")))) is not None
+            and 0 <= age <= max_age_seconds
+        )
+    )
+    result.update({
+        "ais_vessel_count": len(ships),
+        "ais_with_callsign_count": callsign_count,
+        "ais_without_callsign_count": len(ships) - callsign_count,
+        "ais_validated_count": validated_count,
+        "ais_fresh_count": fresh_count,
+    })
     candidates = [(ship, codes_for_ship(ship).get(code)) for ship in ships]
     candidates = [(ship, method) for ship, method in candidates if method]
     # Dutch ATIS identity may be retained with a foreign AIS MMSI. Only use

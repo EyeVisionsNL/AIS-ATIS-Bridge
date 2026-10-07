@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ais-atis-bridge"
-version = "0.1.13"
+version = "0.1.14"
 description = "Marine ATIS decoder and AIS-catcher companion with Smart Gain and replay"
 requires-python = ">=3.11"
 dependencies = ["Flask>=3.0,<4", "numpy>=1.24,<3", "openpyxl>=3.1,<4"]
