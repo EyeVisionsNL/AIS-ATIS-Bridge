@@ -104,3 +104,12 @@ h2{color:#e3f4ff}.subpanel,.control-section{border-color:#203950;background:#091
 .recordings-list{grid-template-columns:repeat(2,minmax(0,1fr))}
 @media(max-width:700px){#settings{display:flex;flex-direction:column}#settings .channel-selection{order:1}#settings .receiver-selection{order:0}#settings .rf-section{order:2}#settings>.action-grid,#settings>.action-message{order:3}#settings .channels{max-height:250px}.topbar{min-height:220px;background-position:65% center}.hero-side{gap:8px}.radar-art{width:86px;height:86px}.recordings-list{grid-template-columns:1fr}}
 @media(max-width:420px){.hero-side{display:flex;flex-direction:column;align-items:flex-end}.topbar{gap:8px;padding:16px}.topbar h1{font-size:1.65rem}.hero-state{padding:6px}.hero-tags{gap:5px}.radar-art{width:70px;height:70px}.brand-copy{min-width:0}.tagline{max-width:210px}}
+
+.vessel-photo-card{margin-top:14px;display:flex;gap:14px;align-items:center;padding:12px;border:1px solid rgba(125,211,252,.22);border-radius:14px;background:rgba(7,20,31,.58)}
+.vessel-photo-card[hidden]{display:none}
+.vessel-photo-card img{width:150px;height:96px;object-fit:cover;border-radius:10px;background:rgba(255,255,255,.05)}
+.vessel-photo-card img:not([src]){display:none}
+.vessel-photo-card div{display:flex;flex-direction:column;gap:5px;min-width:0}
+.vessel-photo-card small{opacity:.72;line-height:1.35}
+.recording-save{white-space:nowrap}
+@media(max-width:700px){.vessel-photo-card{align-items:flex-start;flex-direction:column}.vessel-photo-card img{width:100%;height:auto;max-height:220px}}
