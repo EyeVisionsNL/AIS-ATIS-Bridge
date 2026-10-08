@@ -3,7 +3,7 @@
     "LICENSE": "89c9ffb0fd2abbc39441ade154dfc4e6a69d7ff679cd69556ef94f5ae9a14cbf",
     "README.md": "da204f8703e9e5b0722ef9ef0c838ada7a2906ba41b806bfd7cc57ede6c52bf9",
     "RELEASE_CHANNEL": "239a504b8fa8af02038344df4f2d489e80c8307d42deb37ee7ca754385a42003",
-    "VERSION": "bd270b0ddecef6c53cde260e7964048b1186147606e6643d2ccb8cf04e167bd1",
+    "VERSION": "7e6110d7cfbed8f555feacd7bcf8dd6c5af6af23884ce7d6b52179dd1e8eb9a4",
     "ais_atis_bridge/__init__.py": "5999962bd872c112324fd23c842604d00acfd1c9395d1cd8f7fb26c8633465d2",
     "ais_atis_bridge/ais.py": "273670bc3edc7873462eab0b9d9c02bcdca2f0ee19d0e8f47e1b2be20c17897a",
     "ais_atis_bridge/app.py": "de7cf32cb276ac98ea3967e45e26f1443572f2cbf8fee9f8a385648911046402",
@@ -15,7 +15,7 @@
     "ais_atis_bridge/recordings.py": "b753fbed401b26ca8b616d5e815ededee8415271d8deca90b016864fc541dd9b",
     "ais_atis_bridge/runtime.py": "7eb619810d193c21019384bc8966bf403ea0d85038388a907951d2cb5c5e2503",
     "ais_atis_bridge/smart_gain.py": "6f1a7c02c2e61eaa8bdec199fca05555816fc2a358829e3a5fb77914b23eb2eb",
-    "ais_atis_bridge/static/app.js": "30275b0e79baeda38becd9fa31e6af75bf2eae63bda1f38bbe3755246150f125",
+    "ais_atis_bridge/static/app.js": "8594888ed6f250acfd82045d85a72b5438f4cada6433862a60daf01b56c66aae",
     "ais_atis_bridge/static/audio.js": "060db17645644a0c05d9b4695cfc9093e5330bb59d015a8fa24fa5bd0c1b556e",
     "ais_atis_bridge/static/map.js": "576bd841703623022b776b9bea82b7313df9d391626a2d71a5a7288446b50f7d",
     "ais_atis_bridge/static/marine-ship-banner.webp": "eda85369442f5774a5af44b85b89f3d557c01d3969af9eab7a5d328dabde92b9",
@@ -35,7 +35,7 @@
     "systemd/70-ais-atis-bridge.rules": "f5947bff94ef9deb070d9a340350b0f179525483286ce52ce19ab8ef16ebcb19",
     "systemd/ais-atis-bridge.service": "120f08a716f180162ea0d88a54683ef596d9a3ca58b3cce7a2f28c3231177bd1",
     "uninstall.sh": "669fd36f59c58a672f07b193d5a8d836d03b82f7389621fb79500f36dfa2c086",
-    "ais_atis_bridge/vessel_photo.py": "68319c203588ce42fbe34294cf5cba4668b8bb2ddc003a4059ef8cab711a7667"
+    "ais_atis_bridge/vessel_photo.py": "5c5e6caeadbc34cc377d79f264a11408d609467e7bb1036c80a94f9e6cb9fe0f"
   },
   "manifest_version": 1
 }

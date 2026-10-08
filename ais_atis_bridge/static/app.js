@@ -77,7 +77,14 @@ async function renderVesselPhoto(match) {
       return;
     }
     $('vessel-photo').src = result.image_url; $('vessel-photo').alt = 'Photo of ' + name;
-    $('vessel-photo-status').textContent = [result.source, result.artist, result.license].filter(Boolean).join(' · ') || 'Wikimedia Commons';
+    const credit = $('vessel-photo-status');
+    credit.textContent = [result.source, result.artist, result.license].filter(Boolean).join(' · ') || 'Wikimedia Commons';
+    if (result.page_url && /^https:\/\/(?:markprummel\.nl|commons\.wikimedia\.org)\//.test(result.page_url)) {
+      const original = document.createElement('a');
+      original.href = result.page_url; original.target = '_blank'; original.rel = 'noopener noreferrer';
+      original.textContent = 'View original ↗';
+      credit.append(' · ', original);
+    }
   } catch (_) {
     if (requestId === vesselPhotoRequest) $('vessel-photo-status').textContent = 'Photo lookup failed.';
   }
