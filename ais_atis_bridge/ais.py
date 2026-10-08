@@ -111,6 +111,7 @@ def match_atis(atis_code: str, payload: Any, max_age_seconds: float = 1800.0) ->
             "callsign": str(ship.get("callsign") or "").strip().upper() or None,
             "shipname": str(ship.get("shipname") or "").strip()[:80] or None,
             "imo": str(ship.get("imo") or "").strip().removesuffix(".0")[:20] or None,
+            "eni": str(ship.get("eni") or "").strip().removesuffix(".0")[:20] or None,
             "latitude": round(lat, 6), "longitude": round(lon, 6),
             "last_signal_seconds": round(age, 1),
         })

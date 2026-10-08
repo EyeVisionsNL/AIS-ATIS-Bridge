@@ -57,6 +57,7 @@ function renderPhotoToggle() {
 function clearVesselPhoto() {
   vesselPhotoRequest += 1; vesselPhotoMmsi = '';
   $('vessel-photo-card').hidden = true; $('vessel-photo').removeAttribute('src');
+  $('vessel-photo-source-link').removeAttribute('href');
 }
 async function renderVesselPhoto(match) {
   if (!shipPhotosEnabled) return;
@@ -66,20 +67,26 @@ async function renderVesselPhoto(match) {
   vesselPhotoMmsi = mmsi; const requestId = ++vesselPhotoRequest;
   const name = String(match.shipname || match.callsign || ('MMSI ' + mmsi));
   $('vessel-photo-card').hidden = false; $('vessel-photo').removeAttribute('src');
+  $('vessel-photo-source-link').removeAttribute('href');
   $('vessel-photo-name').textContent = name; $('vessel-photo-status').textContent = 'Searching vessel photo…';
   try {
     const result = await json('/api/vessel-photo?mmsi=' + encodeURIComponent(mmsi)
-      + '&shipname=' + encodeURIComponent(name) + '&imo=' + encodeURIComponent(match.imo || ''));
+      + '&shipname=' + encodeURIComponent(name) + '&imo=' + encodeURIComponent(match.imo || '')
+      + '&eni=' + encodeURIComponent(match.eni || ''));
     if (requestId !== vesselPhotoRequest || !shipPhotosEnabled) return;
     if (!result.ok || !result.image_url) {
       $('vessel-photo').removeAttribute('src');
+      $('vessel-photo-source-link').removeAttribute('href');
       $('vessel-photo-status').textContent = result.status === 'unavailable' ? 'Photo source temporarily unavailable.' : 'No vessel photo found.';
       return;
     }
     $('vessel-photo').src = result.image_url; $('vessel-photo').alt = 'Photo of ' + name;
+    if (result.page_url && /^(?:https:\/\/(?:www\.)?binnenvaartspotter\.nl\/|https:\/\/(?:markprummel\.nl|commons\.wikimedia\.org)\/)/.test(result.page_url)) {
+      $('vessel-photo-source-link').href = result.page_url;
+    }
     const credit = $('vessel-photo-status');
     credit.textContent = [result.source, result.artist, result.license].filter(Boolean).join(' · ') || 'Wikimedia Commons';
-    if (result.page_url && /^https:\/\/(?:markprummel\.nl|commons\.wikimedia\.org)\//.test(result.page_url)) {
+    if (result.page_url && /^(?:https:\/\/(?:www\.)?binnenvaartspotter\.nl\/|https:\/\/(?:markprummel\.nl|commons\.wikimedia\.org)\/)/.test(result.page_url)) {
       const original = document.createElement('a');
       original.href = result.page_url; original.target = '_blank'; original.rel = 'noopener noreferrer';
       original.textContent = 'View original ↗';

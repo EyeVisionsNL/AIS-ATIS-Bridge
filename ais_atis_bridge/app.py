@@ -68,6 +68,7 @@ def create_app() -> Flask:
                 request.args.get("mmsi", ""),
                 request.args.get("shipname", ""),
                 request.args.get("imo", ""),
+                request.args.get("eni", ""),
             ))
         except ValueError as error:
             return jsonify({"ok": False, "status": "invalid", "error": str(error)}), 400

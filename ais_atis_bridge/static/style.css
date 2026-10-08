@@ -113,3 +113,6 @@ h2{color:#e3f4ff}.subpanel,.control-section{border-color:#203950;background:#091
 .vessel-photo-card small{opacity:.72;line-height:1.35}
 .recording-save{white-space:nowrap}
 @media(max-width:700px){.vessel-photo-card{align-items:flex-start;flex-direction:column}.vessel-photo-card img{width:100%;height:auto;max-height:220px}}
+
+/* Photo thumbnail links directly to the photographer's page. */
+.vessel-photo-card .vessel-photo-link{display:block;flex:0 0 auto}
