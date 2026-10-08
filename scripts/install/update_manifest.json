@@ -3,8 +3,8 @@
     "LICENSE": "89c9ffb0fd2abbc39441ade154dfc4e6a69d7ff679cd69556ef94f5ae9a14cbf",
     "README.md": "da204f8703e9e5b0722ef9ef0c838ada7a2906ba41b806bfd7cc57ede6c52bf9",
     "RELEASE_CHANNEL": "239a504b8fa8af02038344df4f2d489e80c8307d42deb37ee7ca754385a42003",
-    "VERSION": "7470694a0b5af87394b523c1a640e2ad099efbe0e6d9e6d2f7a70703e4d04457",
-    "ais_atis_bridge/__init__.py": "46218fd90fa4cc0e8601e8200ccccd296b76d60877924cf9c7de181df3a19bd1",
+    "VERSION": "bd270b0ddecef6c53cde260e7964048b1186147606e6643d2ccb8cf04e167bd1",
+    "ais_atis_bridge/__init__.py": "5999962bd872c112324fd23c842604d00acfd1c9395d1cd8f7fb26c8633465d2",
     "ais_atis_bridge/ais.py": "273670bc3edc7873462eab0b9d9c02bcdca2f0ee19d0e8f47e1b2be20c17897a",
     "ais_atis_bridge/app.py": "de7cf32cb276ac98ea3967e45e26f1443572f2cbf8fee9f8a385648911046402",
     "ais_atis_bridge/atis.py": "1f2dfb725dac8ca4f93c58669cf2e137e11499fb9575877b2e5b52a76601532e",
@@ -35,7 +35,7 @@
     "systemd/70-ais-atis-bridge.rules": "f5947bff94ef9deb070d9a340350b0f179525483286ce52ce19ab8ef16ebcb19",
     "systemd/ais-atis-bridge.service": "120f08a716f180162ea0d88a54683ef596d9a3ca58b3cce7a2f28c3231177bd1",
     "uninstall.sh": "669fd36f59c58a672f07b193d5a8d836d03b82f7389621fb79500f36dfa2c086",
-    "ais_atis_bridge/vessel_photo.py": "1c575bdd2d7fff7ef1c0df51f7da7c6cecf89024b584b385abd25f481e3f6721"
+    "ais_atis_bridge/vessel_photo.py": "68319c203588ce42fbe34294cf5cba4668b8bb2ddc003a4059ef8cab711a7667"
   },
   "manifest_version": 1
 }
