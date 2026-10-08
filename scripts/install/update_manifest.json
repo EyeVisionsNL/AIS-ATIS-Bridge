@@ -3,7 +3,7 @@
     "LICENSE": "89c9ffb0fd2abbc39441ade154dfc4e6a69d7ff679cd69556ef94f5ae9a14cbf",
     "README.md": "da204f8703e9e5b0722ef9ef0c838ada7a2906ba41b806bfd7cc57ede6c52bf9",
     "RELEASE_CHANNEL": "239a504b8fa8af02038344df4f2d489e80c8307d42deb37ee7ca754385a42003",
-    "VERSION": "b0569383609842116bc78ee560cb5a7aee44bdbe59d85efc7b7316cb72389862",
+    "VERSION": "76f75753f47c5f9a402427e4ee481b463e5a164edabccbfeab33964eea31913e",
     "ais_atis_bridge/__init__.py": "5999962bd872c112324fd23c842604d00acfd1c9395d1cd8f7fb26c8633465d2",
     "ais_atis_bridge/ais.py": "6af1806b32fd1f001c928dfdf71a6d9614009fdd6eed2d0eb44aea188ca65f1c",
     "ais_atis_bridge/app.py": "d3833f16dd4ef54e276883d66f4c28c586cc2fe27b6852ee3187e111f0c78473",
@@ -40,8 +40,8 @@
     "tests/test_mark_vessel_photo.py": "668783688cc61efd28f4dff03165e3d46a1908e5bc9fd8636eb1cf9fa6dca163",
     "ais_atis_bridge/binnenvaartspotter.py": "9e57b1b94fb4ede2be0b7d5b0181a1d232481cc9e53afb9881a1512a7899eb1e",
     "tests/test_binnenvaartspotter.py": "7319ffbc4212cf435cfd7cc5a88b08b1883f602ce5d9fdc66b3ac69e6ee2a028",
-    "ais_atis_bridge/debinnenvaart.py": "8e42befebe9a7f1cb297321a2c6ee325c1c70a9bbec159cb2b0c000759d85ad0",
-    "tests/test_debinnenvaart.py": "cfdfca9c6ba1ebbf5cf4b3b9c9ce5422ad65ba44e1967da59b8390777bc2e1fc"
+    "ais_atis_bridge/debinnenvaart.py": "ad65e55930bc2dc4560c2f51889828f46d7b1ab2a9ec5e51fcd75f96ff554fb4",
+    "tests/test_debinnenvaart.py": "810ae966aa95e483db0233bf7ba19de40c0420d8ae6619b92f34afccd1473cd0"
   },
   "manifest_version": 1
 }
