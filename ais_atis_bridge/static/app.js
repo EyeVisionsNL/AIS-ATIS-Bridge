@@ -81,12 +81,13 @@ async function renderVesselPhoto(match) {
       return;
     }
     $('vessel-photo').src = result.image_url; $('vessel-photo').alt = 'Photo of ' + name;
-    if (result.page_url && /^(?:https:\/\/(?:www\.)?binnenvaartspotter\.nl\/|https:\/\/(?:markprummel\.nl|commons\.wikimedia\.org)\/)/.test(result.page_url)) {
+    $('vessel-photo').style.objectFit = result.source === 'De Binnenvaart' ? 'contain' : '';
+    if (result.page_url && /^(?:https:\/\/(?:(?:www\.)?binnenvaartspotter|(?:www\.)?debinnenvaart)\.nl\/|https:\/\/(?:markprummel\.nl|commons\.wikimedia\.org)\/)/.test(result.page_url)) {
       $('vessel-photo-source-link').href = result.page_url;
     }
     const credit = $('vessel-photo-status');
     credit.textContent = [result.source, result.artist, result.license].filter(Boolean).join(' · ') || 'Wikimedia Commons';
-    if (result.page_url && /^(?:https:\/\/(?:www\.)?binnenvaartspotter\.nl\/|https:\/\/(?:markprummel\.nl|commons\.wikimedia\.org)\/)/.test(result.page_url)) {
+    if (result.page_url && /^(?:https:\/\/(?:(?:www\.)?binnenvaartspotter|(?:www\.)?debinnenvaart)\.nl\/|https:\/\/(?:markprummel\.nl|commons\.wikimedia\.org)\/)/.test(result.page_url)) {
       const original = document.createElement('a');
       original.href = result.page_url; original.target = '_blank'; original.rel = 'noopener noreferrer';
       original.textContent = 'View original ↗';
