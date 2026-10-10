@@ -1,15 +1,10 @@
 #!/usr/bin/env python3
 """Regression tests for the Mark Prummel source; no live website calls."""
-import importlib.util
 import unittest
 from unittest.mock import patch
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-SOURCE = ROOT / "ais_atis_bridge/vessel_photo.py"
-spec = importlib.util.spec_from_file_location("mark_vessel_source", SOURCE)
-photos = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(photos)
+from ais_atis_bridge import vessel_photo as photos
 
 REGISTER = """<html><a href="/ship/rix-voyager-5lkk2-9125671/"><span>RIX VOYAGER</span></a>
 <a href="/nl/ship/aaltje-jacoba-9133525/">AALTJE JACOBA</a>

@@ -1,20 +1,16 @@
 #!/usr/bin/env python3
 """Regression tests for ship-photo filtering; no external network needed."""
-import importlib.util
 import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
-MODULE_PATH = REPOSITORY_ROOT / "ais_atis_bridge/vessel_photo.py"
-SPEC = importlib.util.spec_from_file_location("vessel_photo_validation", MODULE_PATH)
-photo = importlib.util.module_from_spec(SPEC)
-SPEC.loader.exec_module(photo)
+from ais_atis_bridge import vessel_photo as photo
 
 
-def candidate(title, description="", categories="", thumb=True, mmsi="", imo=""):
-    more = " ".join(filter(None, [description, ("MMSI " + mmsi) if mmsi else "", ("IMO " + imo) if imo else ""]))
+def candidate(title, description="", categories="", thumb=True, mmsi="", imo="", eni=""):
+    more = " ".join(filter(None, [description, ("MMSI " + mmsi) if mmsi else "", ("IMO " + imo) if imo else "", ("ENI " + eni) if eni else ""]))
     return {
         "title": "File:" + title,
         "imageinfo": [{
@@ -31,8 +27,8 @@ def candidate(title, description="", categories="", thumb=True, mmsi="", imo="")
 
 
 class VesselPhotoValidation(unittest.TestCase):
-    def score(self, page, name="TOURMALINE", imo=""):
-        return photo._score(page, mmsi="244700498", shipname=name, imo=imo)
+    def score(self, page, name="TOURMALINE", imo="", eni="", mmsi="244700498"):
+        return photo._score(page, mmsi=mmsi, shipname=name, imo=imo, eni=eni)
 
     def test_mineral_from_screenshot_is_rejected(self):
         self.assertLess(self.score(candidate(".Tourmaline - Tourmali.jpg",
@@ -49,12 +45,12 @@ class VesselPhotoValidation(unittest.TestCase):
         self.assertLess(self.score(candidate("USS Tourmaline PY-20.jpg",
                                               "USS Tourmaline patrol vessel", "US Navy ships")), 0)
 
-    def test_ship_in_filename_is_accepted(self):
-        self.assertGreaterEqual(self.score(candidate("Motor tanker TOURMALINE.jpg", "Motor tanker Tourmaline")), 100)
+    def test_ship_in_filename_without_matching_identifier_is_rejected(self):
+        self.assertLess(self.score(candidate("Motor tanker TOURMALINE.jpg", "Motor tanker Tourmaline")), 0)
 
-    def test_ship_in_description_is_accepted(self):
-        self.assertGreaterEqual(self.score(candidate("Tourmaline.jpg",
-                                                      "De motortanker Tourmaline bij Vlaardingen")), 100)
+    def test_ship_in_description_without_matching_identifier_is_rejected(self):
+        self.assertLess(self.score(candidate("Tourmaline.jpg",
+                                              "De motortanker Tourmaline bij Vlaardingen")), 0)
 
     def test_name_as_credit_is_not_vessel_identity(self):
         self.assertLess(self.score(candidate("MV Ocean Blue.jpg",
@@ -74,16 +70,41 @@ class VesselPhotoValidation(unittest.TestCase):
         self.assertLess(self.score(candidate("Motor tanker Tourmaline.jpg",
                                               "Motor tanker Tourmaline", imo="7654321"), imo="1234567"), 0)
 
+    def test_correct_eni_is_accepted(self):
+        page = candidate("Unnamed vessel.jpg", "Inland vessel at Rotterdam", eni="02321028")
+        self.assertGreaterEqual(self.score(page, eni="02321028"), 210)
+
+    def test_wikimedia_query_includes_eni(self):
+        with tempfile.TemporaryDirectory() as cache_dir:
+            original_file, original_cache = photo.CACHE_FILE, photo._cache
+            try:
+                photo.CACHE_FILE = Path(cache_dir) / "cache.json"
+                photo._cache = {}
+                with patch.object(photo, "_spotter_lookup", return_value=None), \
+                     patch.object(photo, "_binnenvaart_lookup", return_value=None), \
+                     patch.object(photo, "_mark_lookup", return_value=None), \
+                     patch.object(photo, "_commons_search", return_value=[]) as search:
+                    photo.lookup("244700498", "TOURMALINE", eni="02321028")
+                queries = [call.args[0] for call in search.call_args_list]
+                self.assertIn('"ENI 02321028"', queries)
+            finally:
+                photo.CACHE_FILE = original_file
+                photo._cache = original_cache
+
+    def test_wrong_eni_is_rejected(self):
+        page = candidate("Motor tanker Tourmaline.jpg", "Motor tanker Tourmaline", eni="02311111")
+        self.assertLess(self.score(page, eni="02321028"), 0)
+
     def test_no_thumbnail_is_rejected(self):
         self.assertLess(self.score(candidate("Motor tanker Tourmaline.jpg", thumb=False)), 0)
 
-    def test_mineral_name_can_still_identify_a_ship(self):
-        self.assertGreaterEqual(self.score(candidate("Motor tanker CRYSTAL.jpg",
-                                                      "Motor tanker Crystal"), name="CRYSTAL"), 100)
+    def test_mineral_name_requires_matching_vessel_identity(self):
+        page = candidate("Motor tanker CRYSTAL.jpg", "Motor tanker Crystal", mmsi="244700498")
+        self.assertGreaterEqual(self.score(page, name="CRYSTAL"), 220)
 
     def test_lookup_skips_mineral_and_uses_vessel(self):
         bad = candidate("Tourmaline mineral.jpg", "Tourmaline crystal")
-        good = candidate("Motor tanker TOURMALINE.jpg", "Motor tanker Tourmaline")
+        good = candidate("Motor tanker TOURMALINE.jpg", "Motor tanker Tourmaline", mmsi="244700498")
         with tempfile.TemporaryDirectory() as cache_dir:
             original_file, original_cache = photo.CACHE_FILE, photo._cache
             try:
@@ -101,8 +122,8 @@ class VesselPhotoValidation(unittest.TestCase):
                 photo._cache = original_cache
 
     def test_old_photo_cache_is_not_reused(self):
-        self.assertGreaterEqual(photo.PHOTO_POLICY_VERSION, 4)
-        old_key = "3|244700498|TOURMALINE|"
+        self.assertEqual(photo.PHOTO_POLICY_VERSION, 8)
+        old_key = "7|244700498|TOURMALINE|"
         with tempfile.TemporaryDirectory() as cache_dir:
             original_file, original_cache = photo.CACHE_FILE, photo._cache
             try:

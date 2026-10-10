@@ -21,7 +21,7 @@ PHOTO = ("https://image.jimcdn.com/app/cms/image/transf/"
 PAGE = ('<h1>Specter</h1><h2>Motorvrachtschip</h2><h3>ENI 2321028</h3>'
         '<img src="https://image.jimcdn.com/app/cms/image/transf/'
         'dimension%3D1920x400%3Aformat%3Djpg/path/s/header.jpg" alt="Header">'
-        f'<img src="{PHOTO}" alt="Specter Motorvrachtschip ENI 2321028">')
+        f'<a rel="lightbox[gallery]" href="{PHOTO}"><img src="{PHOTO}" alt="Specter Motorvrachtschip ENI 2321028"></a>')
 PAGE_URL = "https://www.binnenvaartspotter.nl/vrachtschepen-s/specter/"
 
 
@@ -59,19 +59,32 @@ class PhotoTests(unittest.TestCase):
         self.assertIsNone(spotter._result_from_page(
             PAGE, "Tourmaline", PAGE_URL, "244123456", "", "", 10))
 
+    def test_unlabelled_gallery_image_uses_page_identity(self):
+        page = PAGE.replace("specter-motorvrachtschip-eni-2321028.jpg", "vessel-photo.jpg")
+        page = page.replace('alt="Specter Motorvrachtschip ENI 2321028"', 'alt="Motorvrachtschip"')
+        result = spotter._result_from_page(page, "Specter", PAGE_URL,
+                                            "244123456", "", "02321028", 10)
+        self.assertIsNotNone(result)
+
     def test_header_only_rejected(self):
         without_photo = PAGE.replace(f'<img src="{PHOTO}" alt="Specter Motorvrachtschip ENI 2321028">', "")
         self.assertIsNone(spotter._result_from_page(
             without_photo, "Specter", PAGE_URL, "244123456", "", "", 10))
 
+    def test_wrong_eni_in_page_is_rejected(self):
+        page = PAGE.replace("<h3>ENI 2321028</h3>", "<h3>ENI 02311111</h3>")
+        self.assertIsNone(spotter._result_from_page(
+            page, "Specter", PAGE_URL, "244123456", "", "02321028", 10))
+
     def test_original_and_other_domains_refused(self):
         self.assertEqual(spotter._thumbnail_url("https://image.jimcdn.com/full-size.jpg"), "")
         self.assertEqual(spotter._thumbnail_url("https://malicious.test/full-size.jpg"), "")
 
-    def test_duplicate_vessel_names_rejected(self):
-        spotter.SITEMAP = [PAGE_URL, "https://www.binnenvaartspotter.nl/tankschepen/specter/"]
+    def test_duplicate_names_are_checked_by_exact_identity(self):
+        second = "https://www.binnenvaartspotter.nl/tankschepen/specter/"
+        spotter.SITEMAP = [PAGE_URL, second]
         spotter.SITEMAP_CHECKED = spotter.time.monotonic()
-        self.assertEqual(spotter._candidate_urls("Specter"), [])
+        self.assertEqual(spotter._candidate_urls("Specter"), [PAGE_URL, second])
 
     def test_lookup_with_mocked_page(self):
         with patch.object(spotter, "_candidate_urls", return_value=[PAGE_URL]), \

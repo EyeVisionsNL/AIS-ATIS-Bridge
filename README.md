@@ -1,15 +1,14 @@
 # AIS-ATIS Bridge
 
-Standalone Marine ATIS decoder and AIS-catcher companion for a second RTL-SDR.
-Version 0.1.9 adds SDRCC-style Smart Gain, recent Marine audio replays and a
-stable/beta updater.
+Marine VHF voice, validated ATIS identities and AIS vessel matching for an AIS-catcher station.
+AIS-ATIS Bridge uses a second RTL-SDR, so AIS-catcher keeps exclusive ownership of its own receiver.
 
 The first RTL-SDR remains exclusively owned by AIS-catcher. AIS-ATIS Bridge lets
 you select another RTL-SDR, receive selected marine VHF channels, validate the
 10-digit ATIS identity and correlate it with fresh vessels from AIS-catcher's
 local `ships.json` endpoint.
 
-> Initial hardware-validation release. Do not use for navigation or safety.
+> For monitoring and experimentation only. Never use for navigation or safety.
 
 ## First release scope
 
@@ -21,6 +20,7 @@ local `ships.json` endpoint.
 - the SDRCC-aligned Marine Voice workbook (133 unique analogue voice carriers), with Excel import and export
 - RAINWAT ATIS validation (10-unit symbols, time diversity and ECC)
 - exact, fail-closed ATIS-to-AIS matching
+- optional, on-demand vessel thumbnails after a validated live match
 - SDRCC-inspired dashboard, update channel selector and verified updater
 - optional AIS-catcher target-card link plugin
 - systemd service and uninstall script
@@ -33,6 +33,24 @@ RTLSDR-Airband is built from pinned commit
 - a running AIS-catcher viewer exposing `http://127.0.0.1:8119/ships.json`
 - a second RTL-SDR that is not used by AIS-catcher
 - Debian/Raspberry Pi OS 64-bit or Ubuntu
+
+## 🚢 Marine Voice meets AIS
+
+Select marine VHF channels, listen to live audio, decode and validate ATIS, then
+compare it with current AIS-catcher vessel data. The dashboard provides recent
+transmission replays, Smart Gain, the maintained Marine voice list and optional
+vessel photos.
+
+## 📷 Vessel photos
+
+Photo lookup runs only when enabled and a validated live ATIS/AIS match is
+available. Sources are checked in this order: Binnenvaartspotter, De Binnenvaart,
+Mark Prummel, then Wikimedia Commons. The Google Images option opens a search
+page; it does not download or reuse Google's results.
+
+A photo must match the vessel identity through its ENI, IMO or MMSI. A ship name
+alone is not enough. Photo cards retain the photographer credit and source link;
+Binnenvaartspotter results are thumbnails, and original watermarks are kept.
 
 ## Marine voice catalog (0.1.13)
 
@@ -70,12 +88,12 @@ sudo ./install.sh
 Then refresh the dashboard. Subsequent compatible beta releases use the update
 button again. Native service elevation still needs validation on the target Pi.
 
-## Develop / beta 0.1.9
+## Develop / beta 0.1.25
 
-This beta brings the standalone Bridge up to the Marine Traffic feature set:
-Smart Gain, the latest four recordings with channel names and replay, the
-updated Excel Marine channel list, an SDRCC-style dashboard with a radar
-banner, and an updater with backup and rollback.
+Beta 0.1.25 aligns the Bridge photo matching policy with SDRCC, including ENI
+identity checks and stricter Binnenvaartspotter thumbnail validation. It also
+updates the README and photo regression tests. Existing Smart Gain, four recent
+recordings, the Marine channel list, updater and dashboard remain part of the beta.
 
 ### Upgrade an existing checkout
 
@@ -102,16 +120,14 @@ sudo ./install.sh
 
 ### Validation status
 
-85 automated Python tests and the browser-control tests passed. The isolated
-installer tests covered a first installation, reinstalling while preserving
-configuration, and reinstalling from the installed directory. Update and
-rollback behavior were tested with simulated host services. Real RTL-SDR
-reception and native systemd operation still require a hardware test.
+The 37 targeted photo policy and source tests pass without external website
+requests. The existing Bridge release baseline passed 85 automated Python
+tests and browser-control checks; the install and updater tests used simulated
+host services. Test the update and radio reception on the target Pi before
+relying on native systemd or live SDR operation.
 
-At publication on 6 October 2026, the connected GitHub repository showed
-0.1.9, but the direct download endpoint still returned an older version in
-the test environment. A complete online update has therefore not yet been
-confirmed. Stable 0.1.8 does not include the new updater manifest.
+This release is published on `develop` for beta testing. Stable `main` remains
+on 0.1.13 and does not include the beta photo-matching changes.
 
 ## Install stable
 
