@@ -83,6 +83,7 @@ class VesselPhotoValidation(unittest.TestCase):
                 with patch.object(photo, "_spotter_lookup", return_value=None), \
                      patch.object(photo, "_binnenvaart_lookup", return_value=None), \
                      patch.object(photo, "_mark_lookup", return_value=None), \
+                     patch.object(photo, "_rensen_lookup", return_value=None), \
                      patch.object(photo, "_commons_search", return_value=[]) as search:
                     photo.lookup("244700498", "TOURMALINE", eni="02321028")
                 queries = [call.args[0] for call in search.call_args_list]
@@ -111,6 +112,8 @@ class VesselPhotoValidation(unittest.TestCase):
                 photo.CACHE_FILE = Path(cache_dir) / "cache.json"
                 photo._cache = {}
                 with patch.object(photo, "_mark_lookup", return_value=None), \
+                     patch.object(photo, "_spotter_lookup", return_value=None), \
+                     patch.object(photo, "_rensen_lookup", return_value=None), \
                      patch.object(photo, "_commons_search", return_value=[bad, good]):
                     result = photo.lookup("244700498", "TOURMALINE")
                 self.assertTrue(result["ok"])
@@ -121,16 +124,41 @@ class VesselPhotoValidation(unittest.TestCase):
                 photo.CACHE_FILE = original_file
                 photo._cache = original_cache
 
+    def test_supported_rensen_source_precedes_wikimedia(self):
+        rensen = {"ok": True, "source": "Rensen-Driessen",
+                  "image_url": "https://www.rensendriessen.com/wp-content/uploads/2025/07/Reality-26-scaled.jpg",
+                  "page_url": "https://www.rensendriessen.com/ships/reality/",
+                  "logo_overlay": True, "cached_at": 1}
+        with tempfile.TemporaryDirectory() as cache_dir:
+            original_file, original_cache = photo.CACHE_FILE, photo._cache
+            try:
+                photo.CACHE_FILE = Path(cache_dir) / "cache.json"
+                photo._cache = {}
+                with patch.object(photo, "_mark_lookup", return_value=None), \
+                     patch.object(photo, "_spotter_lookup", return_value=None), \
+                     patch.object(photo, "_rensen_lookup", return_value=rensen), \
+                     patch.object(photo, "_commons_search") as commons:
+                    found = photo.lookup("244700498", "Reality")
+                self.assertEqual(found["source"], "Rensen-Driessen")
+                self.assertTrue(found["logo_overlay"])
+                commons.assert_not_called()
+            finally:
+                photo.CACHE_FILE = original_file
+                photo._cache = original_cache
+
     def test_old_photo_cache_is_not_reused(self):
-        self.assertEqual(photo.PHOTO_POLICY_VERSION, 8)
-        old_key = "7|244700498|TOURMALINE|"
+        self.assertEqual(photo.PHOTO_POLICY_VERSION, 9)
+        old_key = "8|244700498|TOURMALINE|"
         with tempfile.TemporaryDirectory() as cache_dir:
             original_file, original_cache = photo.CACHE_FILE, photo._cache
             try:
                 photo.CACHE_FILE = Path(cache_dir) / "cache.json"
                 photo._cache = {old_key: {"ok": True, "image_url": "https://example.com/mineral.jpg", "cached_at": 1e20}}
                 with patch.object(photo, "_mark_lookup", return_value=None), \
-                     patch.object(photo, "_commons_search", return_value=[]):
+                     patch.object(photo, "_spotter_lookup", return_value=None), \
+                     patch.object(photo, "_rensen_lookup", return_value=None), \
+                     patch.object(photo, "_commons_search", return_value=[]), \
+                     patch.object(photo, "_binnenvaart_lookup", return_value=None):
                     result = photo.lookup("244700498", "TOURMALINE")
                 self.assertFalse(result["ok"])
                 self.assertFalse(result["cached"])
