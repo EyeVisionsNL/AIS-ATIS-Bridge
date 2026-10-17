@@ -58,6 +58,7 @@ function clearVesselPhoto() {
   vesselPhotoRequest += 1; vesselPhotoMmsi = '';
   $('vessel-photo-card').hidden = true; $('vessel-photo').removeAttribute('src');
   $('vessel-photo-source-link').removeAttribute('href');
+  $('vessel-photo-source-link').classList.remove('rensen-logo');
 }
 async function renderVesselPhoto(match) {
   if (!shipPhotosEnabled) return;
@@ -68,6 +69,7 @@ async function renderVesselPhoto(match) {
   const name = String(match.shipname || match.callsign || ('MMSI ' + mmsi));
   $('vessel-photo-card').hidden = false; $('vessel-photo').removeAttribute('src');
   $('vessel-photo-source-link').removeAttribute('href');
+  $('vessel-photo-source-link').classList.remove('rensen-logo');
   $('vessel-photo-name').textContent = name; $('vessel-photo-status').textContent = 'Searching vessel photo…';
   try {
     const result = await json('/api/vessel-photo?mmsi=' + encodeURIComponent(mmsi)
@@ -77,17 +79,20 @@ async function renderVesselPhoto(match) {
     if (!result.ok || !result.image_url) {
       $('vessel-photo').removeAttribute('src');
       $('vessel-photo-source-link').removeAttribute('href');
+  $('vessel-photo-source-link').classList.remove('rensen-logo');
       $('vessel-photo-status').textContent = result.status === 'unavailable' ? 'Photo source temporarily unavailable.' : 'No vessel photo found.';
       return;
     }
     $('vessel-photo').src = result.image_url; $('vessel-photo').alt = 'Photo of ' + name;
+    $('vessel-photo-source-link').classList.toggle('rensen-logo',
+      result.source === 'Rensen-Driessen' && result.logo_overlay === true);
     $('vessel-photo').style.objectFit = result.source === 'De Binnenvaart' ? 'contain' : '';
-    if (result.page_url && /^(?:https:\/\/(?:(?:www\.)?binnenvaartspotter|(?:www\.)?debinnenvaart)\.nl\/|https:\/\/(?:markprummel\.nl|commons\.wikimedia\.org)\/)/.test(result.page_url)) {
+    if (result.page_url && /^(?:https:\/\/(?:(?:www\.)?binnenvaartspotter|(?:www\.)?debinnenvaart)\.nl\/|https:\/\/(?:markprummel\.nl|commons\.wikimedia\.org|(?:www\.)?rensendriessen\.com)\/)/.test(result.page_url)) {
       $('vessel-photo-source-link').href = result.page_url;
     }
     const credit = $('vessel-photo-status');
     credit.textContent = [result.source, result.artist, /^thumbnail met toestemming/i.test(String(result.license || '').trim()) ? '' : result.license].filter(Boolean).join(' · ') || 'Wikimedia Commons';
-    if (result.page_url && /^(?:https:\/\/(?:(?:www\.)?binnenvaartspotter|(?:www\.)?debinnenvaart)\.nl\/|https:\/\/(?:markprummel\.nl|commons\.wikimedia\.org)\/)/.test(result.page_url)) {
+    if (result.page_url && /^(?:https:\/\/(?:(?:www\.)?binnenvaartspotter|(?:www\.)?debinnenvaart)\.nl\/|https:\/\/(?:markprummel\.nl|commons\.wikimedia\.org|(?:www\.)?rensendriessen\.com)\/)/.test(result.page_url)) {
       const original = document.createElement('a');
       original.href = result.page_url; original.target = '_blank'; original.rel = 'noopener noreferrer';
       original.textContent = 'View original ↗';
