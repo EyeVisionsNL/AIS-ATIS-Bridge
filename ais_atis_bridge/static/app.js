@@ -85,10 +85,19 @@ async function renderVesselPhoto(match) {
     }
     $('vessel-photo').onerror = () => {
       if (requestId !== vesselPhotoRequest) return;
-      $('vessel-photo').removeAttribute('src');
+      const image = $('vessel-photo');
+      if (result.source === 'Rensen-Driessen' && result.logo_embedded === true
+          && result.source_image_url && !image.dataset.rensenFallback) {
+        image.dataset.rensenFallback = '1';
+        $('vessel-photo-source-link').classList.add('rensen-logo');
+        image.src = result.source_image_url;
+        return;
+      }
+      image.removeAttribute('src');
       $('vessel-photo-source-link').classList.remove('rensen-logo');
       $('vessel-photo-status').textContent = 'Photo could not be loaded.';
     };
+    delete $('vessel-photo').dataset.rensenFallback;
     $('vessel-photo').src = result.image_url; $('vessel-photo').alt = 'Photo of ' + name;
     $('vessel-photo-source-link').classList.toggle('rensen-logo',
       result.source === 'Rensen-Driessen' && result.logo_overlay === true);
