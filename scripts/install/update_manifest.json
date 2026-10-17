@@ -45,7 +45,7 @@
     "ais_atis_bridge/rensendriessen.py": "5d7a386793beb5bb241edd71a90c5d75cb5d25015109bc730c89afefea0accf0",
     "ais_atis_bridge/rensendriessen_image.py": "667721a32f44f8c8adb5c732169fcb10bc8170f2c6821fbb6292fd3ae1f898f5",
     "tests/test_rensen_driessen_photo.py": "73c81857e9d96e97bd3fd2b27bdbacbec6de2ad92c0cacede95fc95029fde0f3",
-    "tests/test_rensen_driessen_image.py": "48a8d1b308649ff36ebcfaca2004b1b0d1b21729719158ff51a2cf43a5d9e008"
+    "tests/test_rensen_driessen_image.py": "3938e86cb9a336c4cfd53f043833be170961e3ee5f1e5db4ef888a9391cefd7e"
   },
   "manifest_version": 1
 }
