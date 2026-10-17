@@ -3,9 +3,9 @@ from __future__ import annotations
 from io import BytesIO
 import json
 import subprocess
-from flask import Response, Flask, jsonify, redirect, render_template, request, send_file, url_for
+from flask import Response, Flask, abort, jsonify, redirect, render_template, request, send_file, url_for
 
-from . import __version__, ais, config, vessel_photo
+from . import __version__, ais, config, vessel_photo, rensendriessen_image
 from .channel_xlsx import export_channels, import_channels
 from .receivers import inventory
 from .runtime import runtime
@@ -64,14 +64,32 @@ def create_app() -> Flask:
     @app.get("/api/vessel-photo")
     def vessel_photo_lookup():
         try:
-            return jsonify(vessel_photo.lookup(
-                request.args.get("mmsi", ""),
-                request.args.get("shipname", ""),
-                request.args.get("imo", ""),
-                request.args.get("eni", ""),
-            ))
+            values = tuple(request.args.get(key, "") for key in ("mmsi", "shipname", "imo", "eni"))
+            result = vessel_photo.lookup(*values)
+            if result.get("ok") and result.get("source") == "Rensen-Driessen":
+                from urllib.parse import urlencode
+                result["image_url"] = "/api/vessel-photo/branded?" + urlencode(
+                    dict(zip(("mmsi", "shipname", "imo", "eni"), values))
+                )
+                result["logo_embedded"] = True
+                result["logo_overlay"] = False
+            return jsonify(result)
         except ValueError as error:
             return jsonify({"ok": False, "status": "invalid", "error": str(error)}), 400
+
+    @app.get("/api/vessel-photo/branded")
+    def rensen_driessen_branded_image():
+        """Embed the logo before delivery: saving the image preserves attribution."""
+        try:
+            values = tuple(request.args.get(key, "") for key in ("mmsi", "shipname", "imo", "eni"))
+            result = vessel_photo.lookup(*values)
+            if not result.get("ok") or result.get("source") != "Rensen-Driessen":
+                abort(404)
+            photo = rensendriessen_image.render(result["image_url"])
+            return send_file(BytesIO(photo), mimetype="image/jpeg",
+                             download_name="Rensen-Driessen-vessel.jpg", max_age=900)
+        except (OSError, ValueError):
+            abort(502)
 
     @app.get("/api/update/status")
     def update_status():
