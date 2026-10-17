@@ -44,13 +44,17 @@ vessel photos.
 ## 📷 Vessel photos
 
 Photo lookup runs only when enabled and a validated live ATIS/AIS match is
-available. Sources are checked in this order: Binnenvaartspotter, De Binnenvaart,
-Mark Prummel, then Wikimedia Commons. The Google Images option opens a search
-page; it does not download or reuse Google's results.
+available. Sources are checked in this order: Mark Prummel, Binnenvaartspotter,
+Rensen-Driessen, Wikimedia Commons, then De Binnenvaart. The Google Images
+option opens a search page; it does not download or reuse Google's results.
 
-A photo must match the vessel identity through its ENI, IMO or MMSI. A ship name
-alone is not enough. Photo cards retain the photographer credit and source link;
-Binnenvaartspotter results are thumbnails, and original watermarks are kept.
+Photos use strict vessel-identity matching wherever identifiers are available.
+Rensen-Driessen's own ship register is matched by one unique exact vessel name,
+with conflicting published identifiers rejected. Wim Driessen has approved
+vessel photo use provided that the Rensen-Driessen logo is shown on each photo.
+The card overlays the logo at the lower-right and links to the ship's original
+page. Photographer credit and pre-existing watermarks remain intact. The logo
+overlay applies to the displayed thumbnail only, not to the original media.
 
 ## Marine voice catalog (0.1.13)
 
