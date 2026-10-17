@@ -18,11 +18,12 @@ from urllib.parse import urlencode, urljoin, urlparse, unquote
 from urllib.request import Request, urlopen
 from .debinnenvaart import lookup as _binnenvaart_lookup
 from .binnenvaartspotter import lookup as _spotter_lookup
+from .rensendriessen import lookup as _rensen_lookup
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 CACHE_FILE = PROJECT_ROOT / "data" / "cache" / "traffic_voice_vessel_photos.json"
 CACHE_SECONDS = 7 * 24 * 3600
-PHOTO_POLICY_VERSION = 8
+PHOTO_POLICY_VERSION = 9
 REJECT_TERMS = re.compile(r"\b(painting|artwork|illustration|drawing|sketch|model ship|scale model|watercolour|watercolor|oil on canvas|postcard|painting of)\b", re.I)
 NEGATIVE_CACHE_SECONDS = 6 * 3600
 _lock = threading.RLock()
@@ -391,7 +392,19 @@ def lookup(mmsi: str, shipname: str = "", imo: str = "", eni: str = "") -> dict:
             if now - float(cached.get("cached_at") or 0) < ttl:
                 return {**cached, "cached": True}
 
-    # Priority 1 (beta): Peter's Binnenvaartspotter.nl, thumbnails only.
+    # Priority 1: Mark Prummel.
+    mark_result = _mark_lookup(mmsi, shipname, imo, now)
+    if mark_result:
+        with _lock:
+            cache = _load()
+            cache[key] = mark_result
+            try:
+                _save(cache)
+            except OSError:
+                pass
+        return {**mark_result, "cached": False}
+
+    # Priority 2: Peter's Binnenvaartspotter.nl, thumbnails only.
     # Missing, ambiguous or unreachable ship pages fall through unchanged.
     spotter_result = _spotter_lookup(mmsi, shipname, imo, eni, now)
     if spotter_result:
@@ -404,30 +417,17 @@ def lookup(mmsi: str, shipname: str = "", imo: str = "", eni: str = "") -> dict:
                 pass
         return {**spotter_result, "cached": False}
 
-    # Priority 2: De Binnenvaart, matching the alphabetic vessel register and ENI.
-    # The photographer's original image and watermark are never modified.
-    binnenvaart_result = _binnenvaart_lookup(mmsi, shipname, imo, eni, now)
-    if binnenvaart_result:
+    # Priority 3: Rensen-Driessen before unlicensed/mixed-photo sources.
+    rensen_result = _rensen_lookup(mmsi, shipname, imo, eni, now)
+    if rensen_result:
         with _lock:
             cache = _load()
-            cache[key] = binnenvaart_result
+            cache[key] = rensen_result
             try:
                 _save(cache)
             except OSError:
                 pass
-        return {**binnenvaart_result, "cached": False}
-
-    # Priority 3: Mark Prummel.
-    mark_result = _mark_lookup(mmsi, shipname, imo, now)
-    if mark_result:
-        with _lock:
-            cache = _load()
-            cache[key] = mark_result
-            try:
-                _save(cache)
-            except OSError:
-                pass
-        return {**mark_result, "cached": False}
+        return {**rensen_result, "cached": False}
 
     # Priority 4: Wikimedia Commons. Ordered fallbacks: exact identifiers first.
     # Ordered fallbacks: exact identifiers first, then vessel name. Each query
@@ -475,6 +475,12 @@ def lookup(mmsi: str, shipname: str = "", imo: str = "", eni: str = "") -> dict:
         }
         if error and best is None:
             result["error"] = error
+
+    # Priority 5 (last resort): De Binnenvaart, after no verified Commons photo.
+    if not result.get("ok"):
+        binnenvaart_result = _binnenvaart_lookup(mmsi, shipname, imo, eni, now)
+        if binnenvaart_result:
+            result = binnenvaart_result
 
     with _lock:
         cache = _load()
