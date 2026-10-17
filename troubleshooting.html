@@ -1,0 +1,38 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Practical checks for reception, audio, maps and installation. AIS-ATIS Bridge documentation and practical guides."><meta name="theme-color" content="#0f172a"><title>Troubleshooting · AIS-ATIS Bridge Guide</title><link rel="stylesheet" href="style.css?v=20261017c"><script src="app.js?v=20261017c" defer></script></head><body><a class="skip" href="#main">Skip to content</a><header class="top"><a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">⚓</span> <span>AIS-ATIS Bridge<small>THE FIELD GUIDE</small></span></a><div class="top-links"><a href="https://github.com/EyeVisionsNL/AIS-ATIS-Bridge">GitHub ↗</a><a href="atis-and-ais.html">AIS map guide</a><span class="pill">● &nbsp; VOICE · IDENTITY · POSITION</span><button class="menu" aria-label="Toggle navigation" aria-expanded="false" aria-controls="sidebar">☰</button></div></header><div class="layout"><aside class="sidebar" id="sidebar"><div class="eyebrow">STATION HANDBOOK</div><div class="search"><label for="search" class="eyebrow">Find a guide</label><input id="search" type="search" placeholder="Search gain, audio, AIS…" autocomplete="off"><div class="search-results" aria-live="polite"></div></div><nav aria-label="Guides"><a href="index.html"><span>00</span> &nbsp; Start here</a><a href="installation.html"><span>01</span> &nbsp; Installation</a><a href="first-steps.html"><span>02</span> &nbsp; First steps</a><a href="receiver-and-channels.html"><span>03</span> &nbsp; Receiver &amp; channels</a><a href="audio-and-recordings.html"><span>04</span> &nbsp; Audio &amp; recordings</a><a href="atis-and-ais.html"><span>05</span> &nbsp; ATIS &amp; AIS map</a><a href="updates.html"><span>06</span> &nbsp; Updates</a><a href="troubleshooting.html" aria-current="page"><span>07</span> &nbsp; Troubleshooting</a></nav><div class="side-note">Marine voice · ATIS · AIS<br>Raspberry Pi · Ubuntu<br><br>Made for curious listeners.<br><a href="https://github.com/EyeVisionsNL/AIS-ATIS-Bridge/issues">Questions & ideas ↗</a><br><a href="https://eyevisionsnl.github.io/SDRCC/">SDRCC field guide ↗</a></div></aside><main class="content" id="main"><div class="crumb">AIS-ATIS Bridge / Documentation / Troubleshooting</div><section class="hero"><div class="hero-media"><img class="hero-image" src="https://raw.githubusercontent.com/EyeVisionsNL/AIS-ATIS-Bridge/e2887ef5ae14257222c41257a6d421db3f79ba01/ais_atis_bridge/static/marine-ship-banner.webp" alt="AIS-ATIS Bridge marine panorama"><div class="radar" aria-hidden="true"><div class="sweep"></div><i></i><i></i><i></i></div></div><div class="hero-copy"><div class="eyebrow">THE AIS-ATIS Bridge GUIDE / TROUBLESHOOTING</div><h1>Get back to listening.</h1><p>Practical checks for reception, audio, maps and installation.</p></div></section><div class="article-wrap"><article class="article"><h2 id="dashboard-will-not-open">Dashboard will not open</h2>
+<p>Check that you are using the Pi’s address and port <strong>8120</strong>, and that your browser can reach that machine. On the Pi, inspect the service:</p>
+<pre><code class="language-bash">systemctl status ais-atis-bridge --no-pager
+journalctl -u ais-atis-bridge -n 100 --no-pager
+</code></pre>
+<p>The logs are useful when reporting a startup or receiver problem.</p>
+<h2 id="receiver-missing-or-stopped">Receiver missing or stopped</h2>
+<p>Confirm that a second dongle is connected and selected. Do not select the receiver already used by AIS-catcher. Check the service log for USB access or RTLSDR-Airband errors.</p>
+<p>Older releases had a receiver lifecycle problem corrected in 0.1.5. Upgrade an old installation before chasing that symptom further.</p>
+<h2 id="scanner-sticks-on-a-channel">Scanner sticks on a channel</h2>
+<p>A manual squelch threshold below the noise floor can hold the scanner open. Try <strong>Automatic (noise tracking)</strong> or raise the manual threshold, then save and start again.</p>
+<h2 id="speech-but-no-vessel-match">Speech, but no vessel match</h2>
+<p>Speech alone does not guarantee valid ATIS. Check whether an identity was validated, whether AIS-catcher’s local <code>ships.json</code> is available, and whether the candidate vessel has fresh, valid and unique AIS data. See <a href="atis-and-ais.html">ATIS and AIS</a>.</p>
+<h2 id="map-does-not-open">Map does not open</h2>
+<p>Allow the browser’s pop-up for the dashboard. Map controls require a fresh unique match. Confirm the viewer URL if you changed AIS-catcher’s port or path.</p>
+<h2 id="recordings-disappeared">Recordings disappeared</h2>
+<p>The four recent recordings are held in memory and are cleared on a Bridge restart. This is expected. See <a href="audio-and-recordings.html">Audio and recordings</a>.</p>
+<h2 id="installer-or-update-failed">Installer or update failed</h2>
+<p>Use <a href="updates.html">Updates</a> for the older updater repair and terminal upgrade. From a Stable source checkout, retry with:</p>
+<pre><code class="language-bash">cd ~/AIS-ATIS-Bridge
+git pull --ff-only origin main
+sudo ./install.sh
+</code></pre>
+<p>Preserve local tracked-file edits first. The installer does not install or restart AIS-catcher itself.</p>
+<h2 id="ask-for-help">Ask for help</h2>
+<p><a href="https://github.com/EyeVisionsNL/AIS-ATIS-Bridge/issues">Open an issue on GitHub</a> with your Bridge version, operating system, receiver model, selected mode, exact error and relevant service logs. Remove private details before posting.</p></article><aside class="toc" aria-label="On this page"><strong>ON THIS PAGE</strong><div class="toc">
+<ul>
+<li><a href="#dashboard-will-not-open">Dashboard will not open</a></li>
+<li><a href="#receiver-missing-or-stopped">Receiver missing or stopped</a></li>
+<li><a href="#scanner-sticks-on-a-channel">Scanner sticks on a channel</a></li>
+<li><a href="#speech-but-no-vessel-match">Speech, but no vessel match</a></li>
+<li><a href="#map-does-not-open">Map does not open</a></li>
+<li><a href="#recordings-disappeared">Recordings disappeared</a></li>
+<li><a href="#installer-or-update-failed">Installer or update failed</a></li>
+<li><a href="#ask-for-help">Ask for help</a></li>
+</ul>
+</div>
+</aside></div><div class="pager"><a href="updates.html">← Updates</a><a href="index.html">Back to start ↑</a></div><footer class="footer"><span>AIS-ATIS Bridge · Marine voice. Vessel identity. AIS position.</span><span>Guide based on Stable 0.1.13</span></footer></main></div><dialog aria-label="Enlarged screenshot"><button aria-label="Close screenshot">×</button><img alt=""></dialog></body></html>

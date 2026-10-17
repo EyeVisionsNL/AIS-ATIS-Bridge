@@ -1,0 +1,52 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Scanning, Smart Gain, squelch and your Marine channel workbook. AIS-ATIS Bridge documentation and practical guides."><meta name="theme-color" content="#0f172a"><title>Receiver &amp; channels · AIS-ATIS Bridge Guide</title><link rel="stylesheet" href="style.css?v=20261017c"><script src="app.js?v=20261017c" defer></script></head><body><a class="skip" href="#main">Skip to content</a><header class="top"><a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">⚓</span> <span>AIS-ATIS Bridge<small>THE FIELD GUIDE</small></span></a><div class="top-links"><a href="https://github.com/EyeVisionsNL/AIS-ATIS-Bridge">GitHub ↗</a><a href="atis-and-ais.html">AIS map guide</a><span class="pill">● &nbsp; VOICE · IDENTITY · POSITION</span><button class="menu" aria-label="Toggle navigation" aria-expanded="false" aria-controls="sidebar">☰</button></div></header><div class="layout"><aside class="sidebar" id="sidebar"><div class="eyebrow">STATION HANDBOOK</div><div class="search"><label for="search" class="eyebrow">Find a guide</label><input id="search" type="search" placeholder="Search gain, audio, AIS…" autocomplete="off"><div class="search-results" aria-live="polite"></div></div><nav aria-label="Guides"><a href="index.html"><span>00</span> &nbsp; Start here</a><a href="installation.html"><span>01</span> &nbsp; Installation</a><a href="first-steps.html"><span>02</span> &nbsp; First steps</a><a href="receiver-and-channels.html" aria-current="page"><span>03</span> &nbsp; Receiver &amp; channels</a><a href="audio-and-recordings.html"><span>04</span> &nbsp; Audio &amp; recordings</a><a href="atis-and-ais.html"><span>05</span> &nbsp; ATIS &amp; AIS map</a><a href="updates.html"><span>06</span> &nbsp; Updates</a><a href="troubleshooting.html"><span>07</span> &nbsp; Troubleshooting</a></nav><div class="side-note">Marine voice · ATIS · AIS<br>Raspberry Pi · Ubuntu<br><br>Made for curious listeners.<br><a href="https://github.com/EyeVisionsNL/AIS-ATIS-Bridge/issues">Questions & ideas ↗</a><br><a href="https://eyevisionsnl.github.io/SDRCC/">SDRCC field guide ↗</a></div></aside><main class="content" id="main"><div class="crumb">AIS-ATIS Bridge / Documentation / Receiver &amp; channels</div><section class="hero"><div class="hero-media"><img class="hero-image" src="https://raw.githubusercontent.com/EyeVisionsNL/AIS-ATIS-Bridge/e2887ef5ae14257222c41257a6d421db3f79ba01/ais_atis_bridge/static/marine-ship-banner.webp" alt="AIS-ATIS Bridge marine panorama"><div class="radar" aria-hidden="true"><div class="sweep"></div><i></i><i></i><i></i></div></div><div class="hero-copy"><div class="eyebrow">THE AIS-ATIS Bridge GUIDE / RECEIVER & CHANNELS</div><h1>Give your SDR a heading.</h1><p>Scanning, Smart Gain, squelch and your Marine channel workbook.</p></div></section><div class="article-wrap"><article class="article"><h2 id="one-receiver-one-job">One receiver, one job</h2>
+<p>Select the dongle dedicated to marine voice. The Bridge requires an explicit receiver selection; AIS-catcher retains exclusive ownership of its own dongle.</p>
+<h2 id="fixed-channel-or-scan">Fixed channel or scan?</h2>
+<table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>What it does</th>
+<th>A useful starting point</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Fixed channel</td>
+<td>Stays on your selected channel</td>
+<td>Checking a known local voice channel</td>
+</tr>
+<tr>
+<td>Scan channels</td>
+<td>Scans the channels you enable</td>
+<td>Following several nearby marine channels</td>
+</tr>
+</tbody>
+</table>
+<p>Enable at least one channel for scanning, then click <strong>Save and start</strong> after changing settings. <strong>Stop receiver</strong> stops the voice receiver.</p>
+<h2 id="smart-gain">Smart Gain</h2>
+<p>Smart Gain briefly probes up to twelve selected channels, chooses a supported gain step between 0 and 25.4 dB, then holds that gain fixed while receiving. If the probe cannot run or finds no clear signal, it falls back to 12.5 dB.</p>
+<p>Choose <strong>Manual</strong> for your own fixed tuner gain. The input accepts 0–49.6 dB. More gain does not always improve reception; adjust for your antenna and local conditions.</p>
+<h2 id="squelch">Squelch</h2>
+<p><strong>Automatic (noise tracking)</strong> uses the existing 4 dB SNR setting. <strong>Manual (dBFS)</strong> accepts whole-number thresholds from −100 to −1 dBFS; its default is −47 dBFS.</p>
+<p>A higher threshold admits stronger signals only. Too low a threshold can leave the scanner listening to noise instead of moving on. These controls apply to both fixed and scan modes.</p>
+<h2 id="scan-speed">Scan speed</h2>
+<p>Set <strong>Scan speed</strong> from 100 to 500 ms per channel in 50 ms steps. Lower values scan faster; 200 ms per channel is the default. Begin there and adjust once you have confirmed reception.</p>
+<h2 id="marine-channel-workbook">Marine channel workbook</h2>
+<p>The 0.1.13 voice catalog contains <strong>133 unique analogue receive carriers</strong>, including relevant duplex sides and Dutch supplementary/private channels.</p>
+<ul>
+<li><strong>Marine channel list</strong> downloads the supplied workbook.</li>
+<li><strong>Export current</strong> saves your current channel list.</li>
+<li><strong>Import Excel</strong> reads a compatible workbook, including an SDRCC workbook; Aviation rows are ignored and Marine rows retained.</li>
+</ul>
+<p>The supported Marine receive range is 155.775–162.600 MHz. AIS, DSC and other data-only allocations are excluded from Voice. AIS reception remains the job of AIS-catcher.</p>
+<p>When older channel banks migrate, the Bridge matches by frequency, keeps scan choices and custom voice channels, and removes obsolete data-only entries.</p></article><aside class="toc" aria-label="On this page"><strong>ON THIS PAGE</strong><div class="toc">
+<ul>
+<li><a href="#one-receiver-one-job">One receiver, one job</a></li>
+<li><a href="#fixed-channel-or-scan">Fixed channel or scan?</a></li>
+<li><a href="#smart-gain">Smart Gain</a></li>
+<li><a href="#squelch">Squelch</a></li>
+<li><a href="#scan-speed">Scan speed</a></li>
+<li><a href="#marine-channel-workbook">Marine channel workbook</a></li>
+</ul>
+</div>
+</aside></div><div class="pager"><a href="first-steps.html">← First steps</a><a href="audio-and-recordings.html">Audio &amp; recordings →</a></div><footer class="footer"><span>AIS-ATIS Bridge · Marine voice. Vessel identity. AIS position.</span><span>Guide based on Stable 0.1.13</span></footer></main></div><dialog aria-label="Enlarged screenshot"><button aria-label="Close screenshot">×</button><img alt=""></dialog></body></html>

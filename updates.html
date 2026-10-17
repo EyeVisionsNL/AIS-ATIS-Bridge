@@ -1,0 +1,32 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Stable, Beta and updates that preserve your receiver settings. AIS-ATIS Bridge documentation and practical guides."><meta name="theme-color" content="#0f172a"><title>Updates · AIS-ATIS Bridge Guide</title><link rel="stylesheet" href="style.css?v=20261017c"><script src="app.js?v=20261017c" defer></script></head><body><a class="skip" href="#main">Skip to content</a><header class="top"><a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">⚓</span> <span>AIS-ATIS Bridge<small>THE FIELD GUIDE</small></span></a><div class="top-links"><a href="https://github.com/EyeVisionsNL/AIS-ATIS-Bridge">GitHub ↗</a><a href="atis-and-ais.html">AIS map guide</a><span class="pill">● &nbsp; VOICE · IDENTITY · POSITION</span><button class="menu" aria-label="Toggle navigation" aria-expanded="false" aria-controls="sidebar">☰</button></div></header><div class="layout"><aside class="sidebar" id="sidebar"><div class="eyebrow">STATION HANDBOOK</div><div class="search"><label for="search" class="eyebrow">Find a guide</label><input id="search" type="search" placeholder="Search gain, audio, AIS…" autocomplete="off"><div class="search-results" aria-live="polite"></div></div><nav aria-label="Guides"><a href="index.html"><span>00</span> &nbsp; Start here</a><a href="installation.html"><span>01</span> &nbsp; Installation</a><a href="first-steps.html"><span>02</span> &nbsp; First steps</a><a href="receiver-and-channels.html"><span>03</span> &nbsp; Receiver &amp; channels</a><a href="audio-and-recordings.html"><span>04</span> &nbsp; Audio &amp; recordings</a><a href="atis-and-ais.html"><span>05</span> &nbsp; ATIS &amp; AIS map</a><a href="updates.html" aria-current="page"><span>06</span> &nbsp; Updates</a><a href="troubleshooting.html"><span>07</span> &nbsp; Troubleshooting</a></nav><div class="side-note">Marine voice · ATIS · AIS<br>Raspberry Pi · Ubuntu<br><br>Made for curious listeners.<br><a href="https://github.com/EyeVisionsNL/AIS-ATIS-Bridge/issues">Questions & ideas ↗</a><br><a href="https://eyevisionsnl.github.io/SDRCC/">SDRCC field guide ↗</a></div></aside><main class="content" id="main"><div class="crumb">AIS-ATIS Bridge / Documentation / Updates</div><section class="hero"><div class="hero-media"><img class="hero-image" src="https://raw.githubusercontent.com/EyeVisionsNL/AIS-ATIS-Bridge/e2887ef5ae14257222c41257a6d421db3f79ba01/ais_atis_bridge/static/marine-ship-banner.webp" alt="AIS-ATIS Bridge marine panorama"><div class="radar" aria-hidden="true"><div class="sweep"></div><i></i><i></i><i></i></div></div><div class="hero-copy"><div class="eyebrow">THE AIS-ATIS Bridge GUIDE / UPDATES</div><h1>Keep your Bridge current.</h1><p>Stable, Beta and updates that preserve your receiver settings.</p></div></section><div class="article-wrap"><article class="article"><h2 id="update-from-the-dashboard">Update from the dashboard</h2>
+<ol>
+<li>Open <strong>Bridge updates</strong>.</li>
+<li>Choose <strong>Stable</strong> for <code>main</code> or <strong>Beta</strong> for <code>develop</code>.</li>
+<li>Click <strong>Check for updates</strong>.</li>
+<li>Review the available version and click <strong>Install update</strong>.</li>
+<li>Let the Bridge restart, then refresh the dashboard and check its version.</li>
+</ol>
+<p>The updater verifies SHA-256 hashes, backs up installed application files and runs a health check. A failed health check triggers rollback.</p>
+<h2 id="your-settings-stay-yours">Your settings stay yours</h2>
+<p>Receiver selection, mode, channels, gain, squelch and viewer settings are preserved. Configuration lives at <code>/etc/ais-atis-bridge/config.json</code>, outside the application update.</p>
+<p>The release-channel preference is saved independently of receiver settings. An explicit switch between Stable and Beta can install the selected branch even if its version is equal or older, provided that branch has an update manifest. Older releases within the currently installed channel remain blocked.</p>
+<h2 id="upgrade-an-older-checkout">Upgrade an older checkout</h2>
+<p>Run the installer once to install the updater and service changes:</p>
+<pre><code class="language-bash">cd ~/AIS-ATIS-Bridge
+git fetch origin
+git switch main
+git pull --ff-only origin main
+sudo ./install.sh
+</code></pre>
+<p>Preserve any local edits to tracked files before switching or pulling. For Beta, use <code>develop</code> instead of <code>main</code> in both branch commands.</p>
+<h2 id="no-new-privileges-update-error">“No new privileges” update error</h2>
+<p>Older service settings could block the updater helper. Run the terminal upgrade above once to repair those settings, then refresh the dashboard. The blocked updater cannot repair its own service configuration.</p>
+<p>Future compatible releases can use the dashboard update button again.</p></article><aside class="toc" aria-label="On this page"><strong>ON THIS PAGE</strong><div class="toc">
+<ul>
+<li><a href="#update-from-the-dashboard">Update from the dashboard</a></li>
+<li><a href="#your-settings-stay-yours">Your settings stay yours</a></li>
+<li><a href="#upgrade-an-older-checkout">Upgrade an older checkout</a></li>
+<li><a href="#no-new-privileges-update-error">“No new privileges” update error</a></li>
+</ul>
+</div>
+</aside></div><div class="pager"><a href="atis-and-ais.html">← ATIS &amp; AIS map</a><a href="troubleshooting.html">Troubleshooting →</a></div><footer class="footer"><span>AIS-ATIS Bridge · Marine voice. Vessel identity. AIS position.</span><span>Guide based on Stable 0.1.13</span></footer></main></div><dialog aria-label="Enlarged screenshot"><button aria-label="Close screenshot">×</button><img alt=""></dialog></body></html>
