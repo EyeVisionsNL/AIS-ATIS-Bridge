@@ -1,7 +1,7 @@
 {
   "files": {
     "LICENSE": "89c9ffb0fd2abbc39441ade154dfc4e6a69d7ff679cd69556ef94f5ae9a14cbf",
-    "README.md": "9d9155ab5d7350596d9e8ebaaa2f00a1a444baab85e6f0faea6b363934f5dda9",
+    "README.md": "39a2b9d0e4e46f5daf7c1b2ffced9dacdd4236b34b66ced2b4727d09029262dd",
     "RELEASE_CHANNEL": "239a504b8fa8af02038344df4f2d489e80c8307d42deb37ee7ca754385a42003",
     "VERSION": "2f9d5846cd782c38fbe467cf86ec1401dd1b648c42ea4376b1e82c7fb62f4edf",
     "ais_atis_bridge/__init__.py": "70823ed321415eeba19f0eb36fae9d651642a7b64959db4d10229cec4947a812",
@@ -44,7 +44,8 @@
     "tests/test_debinnenvaart.py": "810ae966aa95e483db0233bf7ba19de40c0420d8ae6619b92f34afccd1473cd0",
     "ais_atis_bridge/rensendriessen.py": "5d7a386793beb5bb241edd71a90c5d75cb5d25015109bc730c89afefea0accf0",
     "ais_atis_bridge/rensendriessen_image.py": "667721a32f44f8c8adb5c732169fcb10bc8170f2c6821fbb6292fd3ae1f898f5",
-    "tests/test_rensen_driessen_photo.py": "73c81857e9d96e97bd3fd2b27bdbacbec6de2ad92c0cacede95fc95029fde0f3"
+    "tests/test_rensen_driessen_photo.py": "73c81857e9d96e97bd3fd2b27bdbacbec6de2ad92c0cacede95fc95029fde0f3",
+    "tests/test_rensen_driessen_image.py": "48a8d1b308649ff36ebcfaca2004b1b0d1b21729719158ff51a2cf43a5d9e008"
   },
   "manifest_version": 1
 }
