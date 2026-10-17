@@ -52,9 +52,12 @@ Photos use strict vessel-identity matching wherever identifiers are available.
 Rensen-Driessen's own ship register is matched by one unique exact vessel name,
 with conflicting published identifiers rejected. Wim Driessen has approved
 vessel photo use provided that the Rensen-Driessen logo is shown on each photo.
-The card overlays the logo at the lower-right and links to the ship's original
-page. Photographer credit and pre-existing watermarks remain intact. The logo
-overlay applies to the displayed thumbnail only, not to the original media.
+The card shows the logo at the lower-right and links to the ship's original
+page. Where Pillow is installed, the Bridge serves a branded JPEG with the
+logo embedded, so saving the displayed image preserves the logo. On older
+installations without Pillow, a visible CSS overlay is used instead.
+Photographer credit and pre-existing watermarks remain intact; originals are
+never modified.
 
 ## Marine voice catalog (0.1.13)
 
