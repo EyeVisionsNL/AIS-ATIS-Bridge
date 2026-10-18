@@ -3,9 +3,9 @@ from __future__ import annotations
 from io import BytesIO
 import json
 import subprocess
-from flask import Response, Flask, jsonify, redirect, render_template, request, send_file, url_for
+from flask import Response, Flask, abort, jsonify, redirect, render_template, request, send_file, url_for
 
-from . import __version__, ais, config
+from . import __version__, ais, config, vessel_photo, rensendriessen_image
 from .channel_xlsx import export_channels, import_channels
 from .receivers import inventory
 from .runtime import runtime
@@ -52,6 +52,47 @@ def create_app() -> Flask:
             return jsonify({"error": "Recording expired or is still in progress"}), 404
         return send_file(BytesIO(payload), mimetype="audio/wav", as_attachment=True,
                          download_name=f"marine-{recording_id[:8]}.wav", max_age=0)
+
+    @app.post("/api/recordings/<recording_id>/save")
+    def save_recording(recording_id: str):
+        payload = request.get_json(silent=True) or {}
+        result = runtime.recordings.save(recording_id, payload)
+        if result is None:
+            return jsonify({"ok": False, "error": "Recording expired or is still in progress"}), 404
+        return jsonify(result)
+
+    @app.get("/api/vessel-photo")
+    def vessel_photo_lookup():
+        try:
+            values = tuple(request.args.get(key, "") for key in ("mmsi", "shipname", "imo", "eni"))
+            result = vessel_photo.lookup(*values)
+            if result.get("ok") and result.get("source") == "Rensen-Driessen":
+                from importlib.util import find_spec
+                if find_spec("PIL") is not None:
+                    from urllib.parse import urlencode
+                    result["source_image_url"] = result["image_url"]
+                    result["image_url"] = "/api/vessel-photo/branded?" + urlencode(
+                        dict(zip(("mmsi", "shipname", "imo", "eni"), values))
+                    )
+                    result["logo_embedded"] = True
+                    result["logo_overlay"] = False
+            return jsonify(result)
+        except ValueError as error:
+            return jsonify({"ok": False, "status": "invalid", "error": str(error)}), 400
+
+    @app.get("/api/vessel-photo/branded")
+    def rensen_driessen_branded_image():
+        """Embed the logo before delivery: saving the image preserves attribution."""
+        try:
+            values = tuple(request.args.get(key, "") for key in ("mmsi", "shipname", "imo", "eni"))
+            result = vessel_photo.lookup(*values)
+            if not result.get("ok") or result.get("source") != "Rensen-Driessen":
+                abort(404)
+            photo = rensendriessen_image.render(result["image_url"])
+            return send_file(BytesIO(photo), mimetype="image/jpeg",
+                             download_name="Rensen-Driessen-vessel.jpg", max_age=900)
+        except (OSError, ValueError):
+            abort(502)
 
     @app.get("/api/update/status")
     def update_status():

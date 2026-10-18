@@ -94,3 +94,26 @@ def test_thirty_minute_boundary(code, age):
     result = match_atis(code, [barendsz(last_signal=age)])
     assert result["matched"] is (age <= 1800)
     assert result["status"] == ("matched" if age <= 1800 else "stale")
+
+
+def test_foreign_standard_callsign_matches_by_live_ais_identity():
+    german = ship(mmsi=211123456, callsign="DA4821", shipname="RHEIN TEST")
+    result = match_atis("9211014821", {"ships": [german]})
+    assert result["matched"] is True
+    assert result["match_method"] == "callsign_standard"
+    assert result["callsign"] == "DA4821"
+
+
+def test_match_diagnostics_report_feed_quality():
+    result = match_atis(
+        "9211014821",
+        {"ships": [
+            ship(mmsi=211123456, callsign="DA4821", last_signal=4),
+            ship(mmsi=211123457, callsign="", last_signal=1900),
+        ]},
+    )
+    assert result["ais_vessel_count"] == 2
+    assert result["ais_with_callsign_count"] == 1
+    assert result["ais_without_callsign_count"] == 1
+    assert result["ais_validated_count"] == 2
+    assert result["ais_fresh_count"] == 1

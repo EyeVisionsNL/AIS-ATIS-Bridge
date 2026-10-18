@@ -1,21 +1,24 @@
 # AIS-ATIS Bridge
 
-Standalone Marine ATIS decoder and AIS-catcher companion for a second RTL-SDR.
-Stable version 0.1.13 includes SDRCC-style Smart Gain, recent Marine audio replays and a
-stable/beta updater.
+Marine VHF voice, validated ATIS identities and AIS vessel matching for an
+AIS-catcher station. Stable version 0.1.26 includes the current photo-matching
+features and Rensen-Driessen branding.
+AIS-ATIS Bridge uses a second RTL-SDR, so AIS-catcher keeps exclusive ownership
+of its own receiver.
 
 The first RTL-SDR remains exclusively owned by AIS-catcher. AIS-ATIS Bridge lets
 you select another RTL-SDR, receive selected marine VHF channels, validate the
 10-digit ATIS identity and correlate it with fresh vessels from AIS-catcher's
 local `ships.json` endpoint.
 
-> Initial hardware-validation release. Do not use for navigation or safety.
+> For monitoring and experimentation only. Never use for navigation or safety.
 
 ## Dashboard preview
 
-Current stable dashboard with illustrative receiver settings and four example
-recordings. These are demonstration data, not live reception. The radar rotates
-in the running dashboard; this screenshot is static.
+The screenshot shows illustrative receiver settings and four example recordings,
+not live reception. It comes from an earlier stable release, so the current
+interface may differ. The radar rotates in the running dashboard; this screenshot
+is static.
 
 ![AIS-ATIS Bridge dashboard: SDR and channels, recent transmissions, validated ATIS and updates](images/dashboard.jpg)
 
@@ -29,6 +32,7 @@ in the running dashboard; this screenshot is static.
 - the SDRCC-aligned Marine Voice workbook (133 unique analogue voice carriers), with Excel import and export
 - RAINWAT ATIS validation (10-unit symbols, time diversity and ECC)
 - exact, fail-closed ATIS-to-AIS matching
+- optional, on-demand vessel thumbnails after a validated live match
 - SDRCC-inspired dashboard, update channel selector and verified updater
 - optional AIS-catcher target-card link plugin
 - systemd service and uninstall script
@@ -42,13 +46,38 @@ RTLSDR-Airband is built from pinned commit
 - a second RTL-SDR that is not used by AIS-catcher
 - Debian/Raspberry Pi OS 64-bit or Ubuntu
 
+## 🚢 Marine Voice meets AIS
+
+Select marine VHF channels, listen to live audio, decode and validate ATIS, then
+compare it with current AIS-catcher vessel data. The dashboard provides recent
+transmission replays, Smart Gain, the maintained Marine voice list and optional
+vessel photos.
+
+## 📷 Vessel photos
+
+Photo lookup runs only when enabled and a validated live ATIS/AIS match is
+available. Sources are checked in this order: Mark Prummel, Binnenvaartspotter,
+Rensen-Driessen and Wikimedia Commons. The Google Images option opens a search
+page; it does not download or reuse Google's results.
+
+Photos use strict vessel-identity matching wherever identifiers are available.
+Rensen-Driessen's own ship register is matched by one unique exact vessel name,
+with conflicting published identifiers rejected. Wim Driessen has approved
+vessel photo use provided that the Rensen-Driessen logo is shown on each photo.
+The card shows the logo at the lower-right and links to the ship's original
+page. Where Pillow is installed, the Bridge serves a branded JPEG with the
+logo embedded, so saving the displayed image preserves the logo. On older
+installations without Pillow, a visible CSS overlay is used instead.
+Photographer credit and pre-existing watermarks remain intact; originals are
+never modified.
+
 ## Marine voice catalog (0.1.13)
 
 Version 0.1.13 aligns AIS-ATIS Bridge with SDRCC's voice-only Dutch Marine
 catalog. The maintained bank contains 133 unique analogue receive carriers,
 including the Dutch supplementary/private channels and both relevant sides of
-duplex voice channels. VHF55L/56L are supported by the 155.775–162.600 MHz
-Marine receive range.
+duplex voice channels. VHF55L/56L are supported by widening the accepted Marine
+range to 155.775–162.600 MHz.
 
 Data-only carriers are deliberately excluded from Voice: AIS1/AIS2, VHF70 DSC,
 ASM1/ASM2 and the VDES/satellite allocations on 24/25/26 and 84/85/86. AIS
@@ -76,18 +105,19 @@ sudo ./install.sh
 ```
 
 Then refresh the dashboard. Subsequent compatible releases use the update
-button again. The user confirmed the repaired release working on their Raspberry Pi.
+button again.
 
-## Stable 0.1.13
+## Stable 0.1.26
 
-This release brings the standalone Bridge up to the Marine Traffic feature set:
-Smart Gain, the latest four recordings with channel names and replay, the
-updated Excel Marine channel list, an SDRCC-style dashboard with a radar
-banner, and an updater with backup and rollback.
+This release promotes the tested `develop` feature set to Stable (`main`). It
+includes strict vessel-identity photo matching, tighter thumbnail validation
+and Rensen-Driessen photographs with the approved logo on each photo. Smart
+Gain, four recent recordings, the Marine voice catalog, updater and dashboard
+remain included.
 
 ### Upgrade an existing checkout
 
-Run the installer once to install the new updater as well:
+Run the installer once to install the current stable files:
 
 ```bash
 cd ~/AIS-ATIS-Bridge
@@ -97,7 +127,7 @@ git pull --ff-only origin main
 sudo ./install.sh
 ```
 
-Existing receiver and channel settings are preserved. Future compatible
+Existing receiver and channel settings are preserved. Future compatible stable
 updates can be installed through **Bridge updates** in the dashboard.
 
 ### Fresh stable installation
@@ -110,15 +140,11 @@ sudo ./install.sh
 
 ### Validation status
 
-85 automated Python tests and the browser-control tests passed. The isolated
-installer tests covered a first installation, reinstalling while preserving
-configuration, and reinstalling from the installed directory. Update and
-rollback behavior were tested with simulated host services. Real RTL-SDR
-reception and native systemd operation still require a hardware test.
-
-Version 0.1.13 was approved for Stable after the user confirmed the update and
-new 133-channel Voice list working on their Raspberry Pi. The main branch includes
-the verified updater manifest.
+The latest develop workflow for this source commit passed 7 targeted
+Rensen-Driessen tests and verified all 46 updater manifest entries. The broader
+feature set has been tested in SDRCC; this promotion carries that tested build
+into Stable. After deployment, confirm service startup and live reception on
+the target host.
 
 ## Install stable
 
@@ -192,27 +218,25 @@ ignored and Marine channels retained.
 
 ### Stable and beta updates
 
-Stable follows `main`; Beta follows `develop`. Selecting a channel saves that
-preference independently from the receiver configuration. Installing a beta
-or stable update does not replace the selected RTL-SDR, scan mode, channel
-selections, gain, squelch or AIS viewer settings. The updater only accepts
-those two repository branches, verifies the downloaded source against the
+Stable follows `main` (0.1.26); Beta follows `develop`. Selecting a channel
+saves that preference independently from the receiver configuration. Installing
+a beta or stable update does not replace the selected RTL-SDR, scan mode,
+channel selections, gain, squelch or AIS viewer settings. The updater only
+accepts those two repository branches, verifies downloaded source against the
 branch's SHA-256 manifest, keeps a file backup and runs an HTTP health check
 before marking a channel installed. An explicit switch between Stable and Beta
 can install the selected branch even when its version is older, provided that
-branch contains the update manifest. Switching between Stable and Beta also
-works when both branches have the same version. Older releases within the
-currently installed channel remain blocked.
+branch contains the updater manifest. Older releases within the currently
+installed channel remain blocked.
 
 The installer preserves the existing Bridge configuration, sets up the
 RTL-SDR Airband runtime, installs the systemd service and registers the
-restricted updater helper. A clean Raspberry Pi OS installation and real USB
-reception still need a hardware test.
+restricted updater helper. The release was tested in SDRCC; after deploying an
+update, confirm service startup and live reception on the target host.
 
-Validation includes a synthetic UDP tone through the receiver, the HTTP audio
+Validation covers the synthetic UDP tone through the receiver, the HTTP audio
 endpoint, channel migration, Smart Gain calculations, bounded replay storage,
-spreadsheet import and dashboard controls. Real RTL-SDR reception still needs
-a hardware test.
+spreadsheet import and dashboard controls.
 
 ## AIS retention window (0.1.8)
 

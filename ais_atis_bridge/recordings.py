@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from collections import deque
 from datetime import datetime
+import json
+from pathlib import Path
 import struct
 import threading
 import time
@@ -16,6 +18,7 @@ PRE_ROLL_SECONDS = 0.4
 POST_ROLL_SECONDS = 0.4
 GAP_SECONDS = 0.7
 MAX_RECORDING_SECONDS = 120.0
+SAVED_RECORDINGS_DIR = Path(__file__).resolve().parent.parent / "data" / "saved_recordings"
 
 
 def float32_to_pcm16(payload: bytes) -> bytes:
@@ -149,6 +152,33 @@ class RecentRecordings:
                     "play_url": f"/api/recordings/{clip['id']}.wav" if "tail" not in clip else None,
                 })
             return result
+
+    def save(self, recording_id: str, metadata: dict[str, Any] | None = None) -> dict[str, Any] | None:
+        if len(recording_id) != 32 or any(ch not in "0123456789abcdef" for ch in recording_id.lower()):
+            return None
+        with self._lock:
+            clip = next((item for item in self._done if item["id"] == recording_id), None)
+            if clip is None:
+                return None
+            wav = _wav(bytes(clip["pcm"]), self.sample_rate)
+            received_at = clip["received_at"]
+            channel = clip["channel"]
+            frequency = clip["frequency_mhz"]
+        stamp = datetime.now().astimezone().strftime("%Y%m%d-%H%M%S")
+        mmsi = str((metadata or {}).get("mmsi") or "")
+        suffix = ("-mmsi-" + mmsi) if len(mmsi) == 9 and mmsi.isdigit() else ""
+        base = f"{stamp}{suffix}-{recording_id[:8]}"
+        SAVED_RECORDINGS_DIR.mkdir(parents=True, exist_ok=True)
+        wav_path = SAVED_RECORDINGS_DIR / f"{base}.wav"
+        json_path = SAVED_RECORDINGS_DIR / f"{base}.json"
+        wav_path.write_bytes(wav)
+        info = {
+            "recording_id": recording_id, "saved_at": datetime.now().astimezone().isoformat(timespec="seconds"),
+            "received_at": received_at, "channel": channel, "frequency_mhz": frequency,
+            **(metadata or {}),
+        }
+        json_path.write_text(json.dumps(info, ensure_ascii=False, indent=2), encoding="utf-8")
+        return {"ok": True, "filename": wav_path.name, "metadata_filename": json_path.name}
 
     def get_wav(self, recording_id: str) -> bytes | None:
         with self._lock:

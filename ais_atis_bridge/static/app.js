@@ -5,6 +5,10 @@ let recordingsSignature = '';
 let updateState = null;
 let updateRequestError = '';
 let updateRequestPending = false;
+let lastMatch = null;
+let shipPhotosEnabled = localStorage.getItem('aisAtisBridge.shipPhotos') === '1';
+let vesselPhotoMmsi = '';
+let vesselPhotoRequest = 0;
 
 async function json(url, options) {
   const response = await fetch(url, options);
@@ -35,6 +39,83 @@ function details(latest, match) {
   if (latest) rows.push(['ATIS code', latest.atis_code], ['Callsign', latest.callsign || '—'], ['Age', `${latest.age_seconds}s`]);
   if (match) rows.push(['AIS status', match.status], ['Ship', match.shipname || '—'], ['MMSI', match.mmsi || '—'], ['Position', match.latitude != null ? `${match.latitude}, ${match.longitude}` : '—']);
   return rows.map(([a, b]) => `<dt>${a}</dt><dd>${b}</dd>`).join('');
+}
+
+
+function updateGoogleImagesLink(match) {
+  const link = $('google-images'), mmsi = String(match?.mmsi || '');
+  if (!match?.matched || !/^\d{9}$/.test(mmsi)) { link.hidden = true; link.removeAttribute('href'); return; }
+  const parts = [match.shipname, match.imo ? ('IMO ' + match.imo) : '', 'MMSI ' + mmsi, 'ship'].filter(Boolean);
+  link.href = 'https://www.google.com/search?tbm=isch&q=' + encodeURIComponent(parts.join(' '));
+  link.hidden = false;
+}
+
+function renderPhotoToggle() {
+  $('ship-photos').textContent = shipPhotosEnabled ? 'Ship photos: on' : 'Ship photos: off';
+  $('ship-photos').setAttribute('aria-pressed', String(shipPhotosEnabled));
+}
+function clearVesselPhoto() {
+  vesselPhotoRequest += 1; vesselPhotoMmsi = '';
+  $('vessel-photo-card').hidden = true; $('vessel-photo').removeAttribute('src');
+  $('vessel-photo-source-link').removeAttribute('href');
+  $('vessel-photo-source-link').classList.remove('rensen-logo');
+}
+async function renderVesselPhoto(match) {
+  if (!shipPhotosEnabled) return;
+  const mmsi = String(match?.mmsi || '');
+  if (!match?.matched || !/^\d{9}$/.test(mmsi)) { clearVesselPhoto(); return; }
+  if (mmsi === vesselPhotoMmsi) return;
+  vesselPhotoMmsi = mmsi; const requestId = ++vesselPhotoRequest;
+  const name = String(match.shipname || match.callsign || ('MMSI ' + mmsi));
+  $('vessel-photo-card').hidden = false; $('vessel-photo').removeAttribute('src');
+  $('vessel-photo-source-link').removeAttribute('href');
+  $('vessel-photo-source-link').classList.remove('rensen-logo');
+  $('vessel-photo-name').textContent = name; $('vessel-photo-status').textContent = 'Searching vessel photo…';
+  try {
+    const result = await json('/api/vessel-photo?mmsi=' + encodeURIComponent(mmsi)
+      + '&shipname=' + encodeURIComponent(name) + '&imo=' + encodeURIComponent(match.imo || '')
+      + '&eni=' + encodeURIComponent(match.eni || ''));
+    if (requestId !== vesselPhotoRequest || !shipPhotosEnabled) return;
+    if (!result.ok || !result.image_url) {
+      $('vessel-photo').removeAttribute('src');
+      $('vessel-photo-source-link').removeAttribute('href');
+      $('vessel-photo-source-link').classList.remove('rensen-logo');
+      $('vessel-photo-status').textContent = result.status === 'unavailable' ? 'Photo source temporarily unavailable.' : 'No vessel photo found.';
+      return;
+    }
+    $('vessel-photo').onerror = () => {
+      if (requestId !== vesselPhotoRequest) return;
+      const image = $('vessel-photo');
+      if (result.source === 'Rensen-Driessen' && result.logo_embedded === true
+          && result.source_image_url && !image.dataset.rensenFallback) {
+        image.dataset.rensenFallback = '1';
+        $('vessel-photo-source-link').classList.add('rensen-logo');
+        image.src = result.source_image_url;
+        return;
+      }
+      image.removeAttribute('src');
+      $('vessel-photo-source-link').classList.remove('rensen-logo');
+      $('vessel-photo-status').textContent = 'Photo could not be loaded.';
+    };
+    delete $('vessel-photo').dataset.rensenFallback;
+    $('vessel-photo').src = result.image_url; $('vessel-photo').alt = 'Photo of ' + name;
+    $('vessel-photo-source-link').classList.toggle('rensen-logo',
+      result.source === 'Rensen-Driessen' && result.logo_overlay === true);
+    $('vessel-photo').style.objectFit = result.source === 'De Binnenvaart' ? 'contain' : '';
+    if (result.page_url && /^(?:https:\/\/(?:(?:www\.)?binnenvaartspotter|(?:www\.)?debinnenvaart)\.nl\/|https:\/\/(?:markprummel\.nl|commons\.wikimedia\.org|(?:www\.)?rensendriessen\.com)\/)/.test(result.page_url)) {
+      $('vessel-photo-source-link').href = result.page_url;
+    }
+    const credit = $('vessel-photo-status');
+    credit.textContent = [result.source, result.artist, /^thumbnail met toestemming/i.test(String(result.license || '').trim()) ? '' : result.license].filter(Boolean).join(' · ') || 'Wikimedia Commons';
+    if (result.page_url && /^(?:https:\/\/(?:(?:www\.)?binnenvaartspotter|(?:www\.)?debinnenvaart)\.nl\/|https:\/\/(?:markprummel\.nl|commons\.wikimedia\.org|(?:www\.)?rensendriessen\.com)\/)/.test(result.page_url)) {
+      const original = document.createElement('a');
+      original.href = result.page_url; original.target = '_blank'; original.rel = 'noopener noreferrer';
+      original.textContent = 'View original ↗';
+      credit.append(' · ', original);
+    }
+  } catch (_) {
+    if (requestId === vesselPhotoRequest) $('vessel-photo-status').textContent = 'Photo lookup failed.';
+  }
 }
 
 function renderState(state) {
@@ -93,6 +174,20 @@ function renderRecordings(items) {
       player.src = item.play_url;
       player.setAttribute('aria-label', `Play ${title.textContent}`);
       row.append(player);
+      const save = document.createElement('button');
+      save.type = 'button'; save.className = 'button secondary recording-save'; save.textContent = '💾 Save';
+      save.addEventListener('click', async () => {
+        save.disabled = true;
+        try {
+          const match = lastMatch?.matched ? lastMatch : {};
+          const result = await json('/api/recordings/' + encodeURIComponent(item.id) + '/save', {
+            method: 'POST', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({mmsi: match.mmsi || null, shipname: match.shipname || null, callsign: match.callsign || null, imo: match.imo || null}),
+          });
+          save.textContent = '✓ Saved'; $('recordings-message').textContent = 'Saved permanently as ' + result.filename;
+        } catch (error) { save.disabled = false; $('recordings-message').textContent = error.message; }
+      });
+      row.append(save);
     } else {
       const pending = document.createElement('span');
       pending.className = 'recording-pending';
@@ -154,6 +249,9 @@ async function refresh() {
     const data = await json('/api/status');
     const state = data.receiver;
     window.atisMap.update(data);
+    lastMatch = data.ais_match || null;
+    updateGoogleImagesLink(lastMatch);
+    renderVesselPhoto(lastMatch);
     renderState(state.state);
     $('identity').textContent = state.latest?.atis_code || 'No validated ATIS received';
     $('details').innerHTML = details(state.latest, data.ais_match);
@@ -183,6 +281,14 @@ async function refresh() {
     window.atisMap.offline();
   }
 }
+
+renderPhotoToggle();
+$('ship-photos').addEventListener('click', () => {
+  shipPhotosEnabled = !shipPhotosEnabled;
+  localStorage.setItem('aisAtisBridge.shipPhotos', shipPhotosEnabled ? '1' : '0');
+  renderPhotoToggle();
+  if (!shipPhotosEnabled) clearVesselPhoto(); else renderVesselPhoto(lastMatch);
+});
 
 $('settings').addEventListener('submit', async event => {
   event.preventDefault();
