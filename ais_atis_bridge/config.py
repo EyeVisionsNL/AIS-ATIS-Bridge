@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import math
 import os
 from copy import deepcopy
 from pathlib import Path
@@ -44,8 +45,8 @@ DEFAULTS = {
     "receiver": "", "tuning_mode": "scan", "selected_channel_id": "vhf61",
     "channel_bank": "rotterdam_port", "channels": DEFAULT_CHANNELS,
     "channel_master_version": CHANNEL_MASTER_VERSION,
-    "gain_mode": "smart", "gain_db": 12.5, "squelch_mode": "auto",
-    "squelch_threshold_dbfs": -47, "scan_interval_ms": 200, "ppm": 0,
+    "gain_mode": "smart", "gain_db": 12.5, "squelch_snr_db": 6.0,
+    "scan_interval_ms": 200, "ppm": 0,
     "ais_ships_url": "http://127.0.0.1:8119/ships.json",
     "ais_viewer_url": "http://127.0.0.1:8119/", "web_host": "0.0.0.0",
     "web_port": 8120,
@@ -160,12 +161,18 @@ def validate(raw:dict[str,Any])->dict[str,Any]:
     try: result["gain_db"]=max(0.0,min(49.6,float(raw.get("gain_db",12.5))))
     except (ValueError,TypeError) as error: raise ValueError("Gain must be a number from 0 to 49.6 dB") from error
     result["ppm"]=max(-200,min(200,int(raw.get("ppm",0))))
-    mode=raw.get("squelch_mode","auto")
-    if mode not in ("auto","manual"): raise ValueError("Invalid squelch mode")
-    try: threshold=float(raw.get("squelch_threshold_dbfs",-47))
-    except (ValueError,TypeError) as error: raise ValueError("Squelch threshold must be an integer from -100 to -1 dBFS") from error
-    if not -100<=threshold<=-1 or not threshold.is_integer(): raise ValueError("Squelch threshold must be an integer from -100 to -1 dBFS")
-    result["squelch_mode"]=mode; result["squelch_threshold_dbfs"]=int(threshold)
+    # Same SNR squelch as SDRCC Marine Traffic. Old Bridge dBFS thresholds
+    # cannot be converted accurately to SNR; existing configs inherit 6 dB.
+    value = raw.get("squelch_snr_db", DEFAULTS["squelch_snr_db"])
+    if isinstance(value, bool):
+        raise ValueError("Squelch must be 1.0–30.0 dB in 0.5 dB steps")
+    try:
+        threshold = float(value)
+    except (ValueError, TypeError) as error:
+        raise ValueError("Squelch must be 1.0–30.0 dB in 0.5 dB steps") from error
+    if not math.isfinite(threshold) or not 1.0 <= threshold <= 30.0 or not (threshold * 2).is_integer():
+        raise ValueError("Squelch must be 1.0–30.0 dB in 0.5 dB steps")
+    result["squelch_snr_db"] = threshold
     try: scan_interval_ms=int(raw.get("scan_interval_ms",200))
     except (ValueError,TypeError) as error: raise ValueError("Scan speed must be 100-500 ms per channel in 50 ms steps") from error
     if scan_interval_ms<100 or scan_interval_ms>500 or scan_interval_ms%50: raise ValueError("Scan speed must be 100-500 ms per channel in 50 ms steps")
