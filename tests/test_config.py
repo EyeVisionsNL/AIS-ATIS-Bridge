@@ -28,6 +28,13 @@ def test_scan_interval_defaults_to_200_ms():
     assert validate({})["scan_interval_ms"] == 200
 
 
+def test_squelch_snr_defaults_and_stricter_threshold():
+    assert validate({})["squelch_snr_db"] == 6.0
+    assert validate({"squelch_snr_db": 1.0})["squelch_snr_db"] == 1.0
+    assert validate({"squelch_snr_db": 30.0})["squelch_snr_db"] == 30.0
+    assert "squelch_mode" not in validate({"squelch_mode": "manual", "squelch_threshold_dbfs": -47})
+
+
 def test_old_channel_bank_migrates_by_frequency_and_keeps_local_choices(tmp_path, monkeypatch):
     monkeypatch.setenv("AIS_ATIS_CONFIG", str(tmp_path / "config.json"))
     path = tmp_path / "config.json"
