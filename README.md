@@ -178,7 +178,7 @@ GPL-3.0. The ATIS decoder is derived from the validated decoder in SDRCC, also m
 
 ### Squelch and map follow
 
-The receiver panel offers automatic noise-tracking squelch (the existing 4 dB SNR setting) or a manual integer threshold from -100 to -1 dBFS. Manual defaults to -47 dBFS; tune it for your antenna and gain. Settings apply to both fixed and scan mode. A threshold below the noise floor can hold the scanner on a channel.
+Bridge now uses the same squelch as SDRCC Marine Traffic: a 1.0–30.0 dB signal-to-noise ratio (SNR) slider, in 0.5 dB steps, defaulting to 6.0 dB. Move right for stricter squelch (stronger signals required); move left for weaker signals. The setting applies to both scan and fixed listening. The previous Automatic/Manual dBFS control has been removed. On upgrade, an existing -47 dBFS or other old absolute threshold cannot be accurately converted to SNR and safely starts at 6.0 dB; other receiver and channel choices remain unchanged.
 
 Click **Show on AIS map** for a fresh, uniquely matched vessel, or **Auto: off** to enable automatic following. Allow the map pop-up once. The same named AIS-catcher window is reused for subsequent fresh ATIS/AIS matches; turning Auto off stops following, and closing the map stops Auto. No map selection is made for stale, ambiguous or missing matches. Set `ais_viewer_url` in the service configuration if the viewer uses a different port or path; localhost is replaced with the browser-facing hostname. The plugin still opens the Bridge from a vessel card.
 
