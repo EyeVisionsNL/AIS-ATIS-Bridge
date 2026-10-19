@@ -1,4 +1,4 @@
-name: Rensen-Driessen photo tests
+name: Bridge regression and photo tests
 
 on:
   push:
@@ -7,6 +7,18 @@ on:
       - 'core/traffic_voice_rensendriessen*.py'
       - 'ais_atis_bridge/rensendriessen*.py'
       - 'tests/test_rensen_driessen*.py'
+      - 'ais_atis_bridge/config.py'
+      - 'ais_atis_bridge/runtime.py'
+      - 'ais_atis_bridge/static/app.js'
+      - 'ais_atis_bridge/static/style.css'
+      - 'ais_atis_bridge/templates/index.html'
+      - 'ais_atis_bridge/__init__.py'
+      - 'tests/test_controls.py'
+      - 'tests/test_config.py'
+      - 'tests/test_ui.cjs'
+      - 'VERSION'
+      - 'pyproject.toml'
+      - 'scripts/install/update_manifest.json'
       - '.github/workflows/rensen-photo-tests.yml'
   workflow_dispatch:
 
@@ -19,8 +31,14 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Install image dependency
-        run: python -m pip install --disable-pip-version-check 'Pillow>=10,<13'
+      - name: Install Bridge test dependencies
+        run: python -m pip install --disable-pip-version-check -e '.[test]'
+      - name: Check JavaScript syntax and UI control contract
+        run: |
+          node --check ais_atis_bridge/static/app.js
+          node tests/test_ui.cjs
+      - name: Check SNR squelch, migration and other configuration tests
+        run: python -m pytest -q tests/test_controls.py tests/test_config.py
       - name: Run offline photo and watermark tests
         run: python -m unittest discover -s tests -p 'test_rensen_driessen*.py' -v
 
