@@ -86,11 +86,8 @@ class ReceiverRuntime:
         gain = (float(resolved_gain_db) if resolved_gain_db is not None else
                 (REFERENCE_GAIN_DB if settings["gain_mode"] == "smart"
                  else float(settings["gain_db"])))
-        squelch = (
-            f"squelch_threshold = {int(settings.get('squelch_threshold_dbfs', -47))};"
-            if settings.get("squelch_mode", "auto") == "manual"
-            else "squelch_snr_threshold = 4.0;"
-        )
+        # SDRCC Marine Traffic: higher SNR dB means stricter squelch.
+        squelch = f"squelch_snr_threshold = {float(settings.get('squelch_snr_db', 6.0)):.1f};"
         frequencies = ", ".join(f"{item['frequency_mhz']:.6f}" for item in channels)
         labels = ", ".join('"' + item["label"].replace('"', "") + '"' for item in channels)
         return f'''log_scan_activity = true;

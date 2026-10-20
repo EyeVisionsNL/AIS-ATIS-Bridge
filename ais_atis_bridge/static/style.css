@@ -126,3 +126,8 @@ h2{color:#e3f4ff}.subpanel,.control-section{border-color:#203950;background:#091
   background:#fff url("https://quem.nl/wp-content/uploads/2021/12/RensenDriessen-Logo-1.jpg") center / 175% auto no-repeat;
   box-shadow:0 1px 6px rgba(0,0,0,.35)
 }
+
+/* SDRCC Marine Traffic-style SNR squelch control (v0.1.27). */
+.squelch-control { margin: 12px 0 8px; }
+.squelch-control input[type="range"] { width: 100%; cursor: pointer; }
+.squelch-control strong { color: var(--cyan-soft); font-variant-numeric: tabular-nums; }

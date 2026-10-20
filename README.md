@@ -1,7 +1,7 @@
 # AIS-ATIS Bridge
 
 Marine VHF voice, validated ATIS identities and AIS vessel matching for an
-AIS-catcher station. Stable version 0.1.26 includes the current photo-matching
+AIS-catcher station. Stable version 0.1.27 includes the current photo-matching
 features and Rensen-Driessen branding.
 AIS-ATIS Bridge uses a second RTL-SDR, so AIS-catcher keeps exclusive ownership
 of its own receiver.
@@ -107,13 +107,9 @@ sudo ./install.sh
 Then refresh the dashboard. Subsequent compatible releases use the update
 button again.
 
-## Stable 0.1.26
+## Stable 0.1.27
 
-This release promotes the tested `develop` feature set to Stable (`main`). It
-includes strict vessel-identity photo matching, tighter thumbnail validation
-and Rensen-Driessen photographs with the approved logo on each photo. Smart
-Gain, four recent recordings, the Marine voice catalog, updater and dashboard
-remain included.
+This release promotes the tested `develop` feature set to Stable (`main`). It includes strict vessel-identity photo matching, tighter thumbnail validation and Rensen-Driessen photographs with the approved logo on each photo. It also aligns Marine squelch with SDRCC using a 1.0–30.0 dB SNR slider in 0.5 dB steps. Smart Gain, four recent recordings, the Marine voice catalog, updater and dashboard remain included.
 
 ### Upgrade an existing checkout
 
@@ -140,11 +136,7 @@ sudo ./install.sh
 
 ### Validation status
 
-The latest develop workflow for this source commit passed 7 targeted
-Rensen-Driessen tests and verified all 46 updater manifest entries. The broader
-feature set has been tested in SDRCC; this promotion carries that tested build
-into Stable. After deployment, confirm service startup and live reception on
-the target host.
+The latest Bridge regression and photo workflow passed on `develop` commit `b697ae2`, including SNR squelch and configuration tests, JavaScript syntax and UI checks, photo tests, and all 46 updater manifest hash checks. After deployment, confirm service startup and live reception on the target host.
 
 ## Install stable
 
@@ -188,7 +180,7 @@ GPL-3.0. The ATIS decoder is derived from the validated decoder in SDRCC, also m
 
 ### Squelch and map follow
 
-The receiver panel offers automatic noise-tracking squelch (the existing 4 dB SNR setting) or a manual integer threshold from -100 to -1 dBFS. Manual defaults to -47 dBFS; tune it for your antenna and gain. Settings apply to both fixed and scan mode. A threshold below the noise floor can hold the scanner on a channel.
+Bridge now uses the same squelch as SDRCC Marine Traffic: a 1.0–30.0 dB signal-to-noise ratio (SNR) slider, in 0.5 dB steps, defaulting to 6.0 dB. Move right for stricter squelch (stronger signals required); move left for weaker signals. The setting applies to both scan and fixed listening. The previous Automatic/Manual dBFS control has been removed. On upgrade, an existing -47 dBFS or other old absolute threshold cannot be accurately converted to SNR and safely starts at 6.0 dB; other receiver and channel choices remain unchanged.
 
 Click **Show on AIS map** for a fresh, uniquely matched vessel, or **Auto: off** to enable automatic following. Allow the map pop-up once. The same named AIS-catcher window is reused for subsequent fresh ATIS/AIS matches; turning Auto off stops following, and closing the map stops Auto. No map selection is made for stale, ambiguous or missing matches. Set `ais_viewer_url` in the service configuration if the viewer uses a different port or path; localhost is replaced with the browser-facing hostname. The plugin still opens the Bridge from a vessel card.
 
@@ -218,7 +210,7 @@ ignored and Marine channels retained.
 
 ### Stable and beta updates
 
-Stable follows `main` (0.1.26); Beta follows `develop`. Selecting a channel
+Stable follows `main` (0.1.27); Beta follows `develop`. Selecting a channel
 saves that preference independently from the receiver configuration. Installing
 a beta or stable update does not replace the selected RTL-SDR, scan mode,
 channel selections, gain, squelch or AIS viewer settings. The updater only

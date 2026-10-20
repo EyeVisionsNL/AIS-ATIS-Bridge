@@ -126,7 +126,8 @@ function renderState(state) {
 }
 
 function syncSquelch() {
-  $('squelch_threshold_dbfs').disabled = $('squelch_mode').value !== 'manual';
+  const value = Number($('squelch_snr_db').value || 6);
+  $('squelch_snr_value').textContent = value.toFixed(1) + ' dB';
 }
 
 function syncGain() {
@@ -260,8 +261,7 @@ async function refresh() {
       $('tuning_mode').value = data.settings.tuning_mode;
       $('gain_mode').value = data.settings.gain_mode;
       $('gain_db').value = data.settings.gain_db;
-      $('squelch_mode').value = data.settings.squelch_mode;
-      $('squelch_threshold_dbfs').value = data.settings.squelch_threshold_dbfs;
+      $('squelch_snr_db').value = String(data.settings.squelch_snr_db ?? 6);
       $('scan_speed').value = String(data.settings.scan_interval_ms ?? 200);
       syncSquelch();
       syncGain();
@@ -308,8 +308,7 @@ $('settings').addEventListener('submit', async event => {
         channels,
         gain_mode: $('gain_mode').value,
         gain_db: Number($('gain_db').value),
-        squelch_mode: $('squelch_mode').value,
-        squelch_threshold_dbfs: Number($('squelch_threshold_dbfs').value),
+        squelch_snr_db: Number($('squelch_snr_db').value),
         scan_interval_ms: Number($('scan_speed').value),
         ppm: 0,
       }),
@@ -340,7 +339,7 @@ $('xlsx').addEventListener('change', async event => {
   event.target.value = '';
 });
 
-$('squelch_mode').addEventListener('change', syncSquelch);
+$('squelch_snr_db').addEventListener('input', syncSquelch);
 $('gain_mode').addEventListener('change', syncGain);
 $('scan_speed').addEventListener('input', syncScanSpeed);
 $('check-update').addEventListener('click', checkForUpdates);
