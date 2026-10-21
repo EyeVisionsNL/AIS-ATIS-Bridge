@@ -1,132 +1,69 @@
-# AIS-ATIS Bridge
+<p align="center">
+  <img src="ais_atis_bridge/static/marine-ship-banner.webp" alt="AIS-ATIS Bridge — marine radio and vessels" width="100%">
+</p>
 
-Marine VHF voice, validated ATIS identities and AIS vessel matching for an
-AIS-catcher station. Stable version 0.1.27 includes the current photo-matching
-features and Rensen-Driessen branding.
-AIS-ATIS Bridge uses a second RTL-SDR, so AIS-catcher keeps exclusive ownership
-of its own receiver.
+<h1 align="center">⚓ AIS-ATIS Bridge</h1>
 
-The first RTL-SDR remains exclusively owned by AIS-catcher. AIS-ATIS Bridge lets
-you select another RTL-SDR, receive selected marine VHF channels, validate the
-10-digit ATIS identity and correlate it with fresh vessels from AIS-catcher's
-local `ships.json` endpoint.
+<p align="center">
+  <strong>Already receiving AIS? Give that spare SDR something to do!</strong><br>
+  Marine VHF · ATIS identification · AIS vessel matching
+</p>
 
-> For monitoring and experimentation only. Never use for navigation or safety.
+<p align="center">
+  <a href="https://eyevisionsnl.github.io/AIS-ATIS-Bridge/"><strong>📖 Wiki & guides</strong></a> ·
+  <a href="https://eyevisionsnl.github.io/AIS-ATIS-Bridge/installation.html"><strong>🔧 Installation</strong></a> ·
+  <a href="https://eyevisionsnl.github.io/AIS-ATIS-Bridge/atis-and-ais.html"><strong>🚢 ATIS & AIS</strong></a> ·
+  <a href="https://github.com/EyeVisionsNL/AIS-ATIS-Bridge/issues"><strong>💬 Help & ideas</strong></a>
+</p>
 
-## Dashboard preview
+## 🚢 Already have AIS-catcher running?
 
-The screenshot shows illustrative receiver settings and four example recordings,
-not live reception. It comes from an earlier stable release, so the current
-interface may differ. The radar rotates in the running dashboard; this screenshot
-is static.
+**Your AIS setup already works with its own RTL-SDR — and you have a second, unused RTL-SDR?** That's exactly what AIS-ATIS Bridge is made for.
 
-![AIS-ATIS Bridge dashboard: SDR and channels, recent transmissions, validated ATIS and updates](images/dashboard.jpg)
+| Your receivers | What they do |
+| --- | --- |
+| **RTL-SDR #1 — already in use** | **AIS-catcher** keeps receiving and tracking ships, unchanged. |
+| **RTL-SDR #2 — spare receiver** | **AIS-ATIS Bridge** listens to marine VHF and decodes ATIS identities. |
 
-## First release scope
+The Bridge reads vessel data from your **existing AIS-catcher** and combines it with received ATIS to show a **Possible Speaker**. It does **not** take over the AIS receiver, install AIS-catcher for you or require the full SDRCC system.
 
-- Raspberry Pi OS 64-bit and Ubuntu 24.04/26.04
-- RTL-SDR inventory and explicit second-receiver selection
-- fixed-channel and multi-channel NFM scanning through RTLSDR-Airband
-- one-shot Smart Gain probe followed by a bounded, fixed tuner gain
-- up to four recent squelch-open Marine recordings, held in memory
-- the SDRCC-aligned Marine Voice workbook (133 unique analogue voice carriers), with Excel import and export
-- RAINWAT ATIS validation (10-unit symbols, time diversity and ECC)
-- exact, fail-closed ATIS-to-AIS matching
-- optional, on-demand vessel thumbnails after a validated live match
-- SDRCC-inspired dashboard, update channel selector and verified updater
-- optional AIS-catcher target-card link plugin
-- systemd service and uninstall script
+**You need a working AIS-catcher installation and two separate receivers for simultaneous AIS and voice reception.** One dongle cannot do both jobs at once.
 
-RTLSDR-Airband is built from pinned commit
-`61c5c4061967752da6b491a924664d72184b38fa` when it is not already installed.
+## 🎙️ What can it do?
 
-## Requirements
+- **Listen or scan** marine VHF channels with live browser audio.
+- **Decode and validate ATIS**, then correlate the identity with current AIS vessel data.
+- **Show the possible vessel** on the AIS map, with optional automatic following.
+- **Replay the four most recent transmissions** (temporary recordings held in memory).
+- **Adjust Smart Gain, manual gain and SNR squelch**, and import/export Marine channel lists.
+- **Show optional vessel photos** with photographer credit and source links after a validated match.
+- **Update from the dashboard** using Stable (`main`) or Beta (`develop`).
 
-- a running AIS-catcher viewer exposing `http://127.0.0.1:8119/ships.json`
-- a second RTL-SDR that is not used by AIS-catcher
-- Debian/Raspberry Pi OS 64-bit or Ubuntu
+A possible speaker is a **correlation, not guaranteed identification**.
 
-## 🚢 Marine Voice meets AIS
+## 🖥️ Dashboard preview
 
-Select marine VHF channels, listen to live audio, decode and validate ATIS, then
-compare it with current AIS-catcher vessel data. The dashboard provides recent
-transmission replays, Smart Gain, the maintained Marine voice list and optional
-vessel photos.
+![AIS-ATIS Bridge dashboard preview with example receiver settings and recordings](images/dashboard.jpg)
 
-## 📷 Vessel photos
+*Illustrative preview with example data from an earlier release; the current dashboard may look different.*
 
-Photo lookup runs only when enabled and a validated live ATIS/AIS match is
-available. Sources are checked in this order: Mark Prummel, Binnenvaartspotter,
-Rensen-Driessen and Wikimedia Commons. The Google Images option opens a search
-page; it does not download or reuse Google's results.
+## 📚 Wiki — quick guides
 
-Photos use strict vessel-identity matching wherever identifiers are available.
-Rensen-Driessen's own ship register is matched by one unique exact vessel name,
-with conflicting published identifiers rejected. Wim Driessen has approved
-vessel photo use provided that the Rensen-Driessen logo is shown on each photo.
-The card shows the logo at the lower-right and links to the ship's original
-page. Where Pillow is installed, the Bridge serves a branded JPEG with the
-logo embedded, so saving the displayed image preserves the logo. On older
-installations without Pillow, a visible CSS overlay is used instead.
-Photographer credit and pre-existing watermarks remain intact; originals are
-never modified.
+| Guide | Go straight to… |
+| --- | --- |
+| [🔧 Installation](https://eyevisionsnl.github.io/AIS-ATIS-Bridge/installation.html) | Requirements and setup |
+| [🔌 First steps](https://eyevisionsnl.github.io/AIS-ATIS-Bridge/first-steps.html) | Selecting your spare receiver |
+| [📻 Receiver & channels](https://eyevisionsnl.github.io/AIS-ATIS-Bridge/receiver-and-channels.html) | Scan lists, gain and squelch |
+| [🎧 Audio & recordings](https://eyevisionsnl.github.io/AIS-ATIS-Bridge/audio-and-recordings.html) | Live listening and replay |
+| [🚢 ATIS & AIS map](https://eyevisionsnl.github.io/AIS-ATIS-Bridge/atis-and-ais.html) | Identity matching and map following |
+| [🔄 Updates](https://eyevisionsnl.github.io/AIS-ATIS-Bridge/updates.html) | Stable/Beta and safe updating |
+| [🛠️ Troubleshooting](https://eyevisionsnl.github.io/AIS-ATIS-Bridge/troubleshooting.html) | Common reception and setup problems |
 
-## Marine voice catalog (0.1.13)
+**[Open the complete AIS-ATIS Bridge Wiki →](https://eyevisionsnl.github.io/AIS-ATIS-Bridge/)**
 
-Version 0.1.13 aligns AIS-ATIS Bridge with SDRCC's voice-only Dutch Marine
-catalog. The maintained bank contains 133 unique analogue receive carriers,
-including the Dutch supplementary/private channels and both relevant sides of
-duplex voice channels. VHF55L/56L are supported by widening the accepted Marine
-range to 155.775–162.600 MHz.
+## 🚀 Quick installation
 
-Data-only carriers are deliberately excluded from Voice: AIS1/AIS2, VHF70 DSC,
-ASM1/ASM2 and the VDES/satellite allocations on 24/25/26 and 84/85/86. AIS
-continues to be handled by AIS-catcher. Existing installations migrate by
-frequency, retain scan choices and custom voice channels, and remove obsolete
-data-only entries.
-
-## Update startup fix (0.1.12)
-
-The service's `NoNewPrivileges=true` setting blocked the restricted sudo
-updater helper. Version 0.1.12 allows that existing no-argument helper to run;
-the Bridge still runs as `aisatis`, and the other filesystem protections remain.
-Update errors now remain visible during automatic dashboard refreshes.
-
-If the update button reports sudo's "no new privileges" flag, install this
-repair once from the terminal, because the blocked updater cannot repair its
-own service settings:
-
-```bash
-cd ~/AIS-ATIS-Bridge
-git fetch origin
-git switch main
-git pull --ff-only origin main
-sudo ./install.sh
-```
-
-Then refresh the dashboard. Subsequent compatible releases use the update
-button again.
-
-## Stable 0.1.27
-
-This release promotes the tested `develop` feature set to Stable (`main`). It includes strict vessel-identity photo matching, tighter thumbnail validation and Rensen-Driessen photographs with the approved logo on each photo. It also aligns Marine squelch with SDRCC using a 1.0–30.0 dB SNR slider in 0.5 dB steps. Smart Gain, four recent recordings, the Marine voice catalog, updater and dashboard remain included.
-
-### Upgrade an existing checkout
-
-Run the installer once to install the current stable files:
-
-```bash
-cd ~/AIS-ATIS-Bridge
-git fetch origin
-git switch main
-git pull --ff-only origin main
-sudo ./install.sh
-```
-
-Existing receiver and channel settings are preserved. Future compatible stable
-updates can be installed through **Bridge updates** in the dashboard.
-
-### Fresh stable installation
+Use **Raspberry Pi OS 64-bit or Ubuntu** (documented Ubuntu versions: 24.04/26.04). First check that AIS-catcher already works and provides its vessel feed at `http://127.0.0.1:8119/ships.json` on the same computer.
 
 ```bash
 git clone --branch main https://github.com/EyeVisionsNL/AIS-ATIS-Bridge.git
@@ -134,139 +71,20 @@ cd AIS-ATIS-Bridge
 sudo ./install.sh
 ```
 
-### Validation status
+Open `http://<your-device-ip>:8120`, select **RTL-SDR #2** (your spare receiver), choose a channel and start listening. **Leave AIS-catcher and its RTL-SDR #1 running.**
 
-The latest Bridge regression and photo workflow passed on `develop` commit `b697ae2`, including SNR squelch and configuration tests, JavaScript syntax and UI checks, photo tests, and all 46 updater manifest hash checks. After deployment, confirm service startup and live reception on the target host.
+For an existing installation, use **Bridge updates** in the dashboard. [Full installation guide →](https://eyevisionsnl.github.io/AIS-ATIS-Bridge/installation.html)
 
-## Install stable
+## 🛰️ Want more than marine radio?
 
-```bash
-git clone https://github.com/EyeVisionsNL/AIS-ATIS-Bridge.git
-cd AIS-ATIS-Bridge
-sudo ./install.sh
-```
+For **AIS, ADS-B, general radio and satellite missions together**, explore our larger project: **[SDRCC — SDR Control Center](https://github.com/EyeVisionsNL/SDRCC)** and its [Wiki](https://eyevisionsnl.github.io/SDRCC/).
 
-Open `http://<raspberry-pi-address>:8120`, select the second receiver and save.
-Use **Bridge updates** to check Stable (`main`) or Beta (`develop`) and install
-an available version. The updater verifies SHA-256 hashes, backs up the
-installed application files, restarts the Bridge and rolls back if its health
-check fails. `/etc/ais-atis-bridge/config.json` is kept outside the update.
+## ❤️ Credits, photos & license
 
-## AIS-catcher viewer plugin
+The Bridge uses [AIS-catcher](https://github.com/jvde-github/AIS-catcher) vessel data and [RTLSDR-Airband](https://github.com/rtl-airband/RTLSDR-Airband) for voice reception. Its ATIS decoder is derived from [SDRCC](https://github.com/EyeVisionsNL/SDRCC), also maintained by EyeVisionsNL. Independent projects retain their own authors and licenses.
 
-The installer copies `plugins/ais_atis_bridge.pjs` to the managed AIS-catcher
-plugin directory when `/etc/AIS-catcher/plugins` exists. Restart the
-AIS-catcher viewer after installation. The plugin adds an **ATIS Bridge** item
-to the selected vessel card and opens the local Bridge page.
+Vessel photos are optional and subject to individual permission or a suitable license. Thanks to photographers and sources including [Mark Prummel](https://markprummel.nl/), [Binnenvaartspotter](https://www.binnenvaartspotter.nl/), [Rensen-Driessen](https://www.rensendriessen.com/building/our-ships/), [Wikimedia Commons](https://commons.wikimedia.org/) and De Binnenvaart. **Photographer credits, original links and watermarks stay intact; approved Rensen-Driessen photos carry its logo.** Permission to display a thumbnail does not grant unrestricted reuse.
 
-## Architecture
+**AIS-ATIS Bridge:** [GNU GPL-3.0](LICENSE) · © EyeVisionsNL. **For monitoring and experimentation only — never for navigation or safety decisions.**
 
-AIS-catcher and AIS-ATIS Bridge never share receiver ownership. RTLSDR-Airband owns
-only the selected voice receiver. The bridge reads AIS-catcher data read-only.
-Configuration changes are rejected if no explicit receiver is selected.
-
-## Development
-
-```bash
-python3 -m venv .venv
-. .venv/bin/activate
-pip install -e '.[test]'
-pytest
-```
-
-## License
-
-GPL-3.0. The ATIS decoder is derived from the validated decoder in SDRCC, also maintained by EyeVisionsNL.
-
-### Squelch and map follow
-
-Bridge now uses the same squelch as SDRCC Marine Traffic: a 1.0–30.0 dB signal-to-noise ratio (SNR) slider, in 0.5 dB steps, defaulting to 6.0 dB. Move right for stricter squelch (stronger signals required); move left for weaker signals. The setting applies to both scan and fixed listening. The previous Automatic/Manual dBFS control has been removed. On upgrade, an existing -47 dBFS or other old absolute threshold cannot be accurately converted to SNR and safely starts at 6.0 dB; other receiver and channel choices remain unchanged.
-
-Click **Show on AIS map** for a fresh, uniquely matched vessel, or **Auto: off** to enable automatic following. Allow the map pop-up once. The same named AIS-catcher window is reused for subsequent fresh ATIS/AIS matches; turning Auto off stops following, and closing the map stops Auto. No map selection is made for stale, ambiguous or missing matches. Set `ais_viewer_url` in the service configuration if the viewer uses a different port or path; localhost is replaced with the browser-facing hostname. The plugin still opens the Bridge from a vessel card.
-
-The interface uses the SDRCC dark blue theme with a radar banner. Real SDR reception and the installed AIS-catcher viewer still require an installation/hardware test.
-
-### Listen to marine voice
-
-Select the second SDR, select scan channels or a fixed channel, and click **Save and start**. Then click **Audio: off** to enable listening. Audio plays through the browser device speakers/headphones, not the Raspberry Pi audio output. Adjust **Volume**; 0% mutes playback. Audio is off on page load and requires a click.
-
-The browser receives live mono 16 kHz audio from the same receiver feed used
-for ATIS decoding. A separate squelch-gated feed keeps up to four recent
-transmissions (maximum two minutes each) in memory and offers WAV replay after
-the signal ends. Recordings are discarded when the Bridge process restarts;
-they are not written to disk. Turning live listening off does not stop
-decoding, scanning or recording. Browser background suspension can require
-another click on Audio.
-
-### Smart Gain and Marine channel list
-
-Smart Gain briefly probes up to twelve selected channels with the second
-receiver, chooses one supported gain step between 0 and 25.4 dB and holds it
-fixed while receiving. When the probe cannot run or finds no clear signal, it
-uses the conservative 12.5 dB reference. Select Manual to set a different
-fixed tuner gain. The Marine channel workbook is available from **Marine
-channel list**; an SDRCC workbook can also be imported, with Aviation rows
-ignored and Marine channels retained.
-
-### Stable and beta updates
-
-Stable follows `main` (0.1.27); Beta follows `develop`. Selecting a channel
-saves that preference independently from the receiver configuration. Installing
-a beta or stable update does not replace the selected RTL-SDR, scan mode,
-channel selections, gain, squelch or AIS viewer settings. The updater only
-accepts those two repository branches, verifies downloaded source against the
-branch's SHA-256 manifest, keeps a file backup and runs an HTTP health check
-before marking a channel installed. An explicit switch between Stable and Beta
-can install the selected branch even when its version is older, provided that
-branch contains the updater manifest. Older releases within the currently
-installed channel remain blocked.
-
-The installer preserves the existing Bridge configuration, sets up the
-RTL-SDR Airband runtime, installs the systemd service and registers the
-restricted updater helper. The release was tested in SDRCC; after deploying an
-update, confirm service startup and live reception on the target host.
-
-Validation covers the synthetic UDP tone through the receiver, the HTTP audio
-endpoint, channel migration, Smart Gain calculations, bounded replay storage,
-spreadsheet import and dashboard controls.
-
-## AIS retention window (0.1.8)
-
-AIS matches now accept records up to 1800 seconds (30 minutes) old, matching
-AIS-catcher's default retention window. Older records remain rejected. This
-changes the allowed AIS age only; the received ATIS must still be fresh and
-the vessel identity and position must pass the existing checks.
-
-## ATIS callsign fallback (0.1.7)
-
-When standard ATIS matching finds no candidate, Dutch ATIS identities (MID
-244, 245 or 246) also match the exact normalized call sign in the AIS feed.
-This supports PD4821 / BARENDSZ with Belgian MMSI 205595190. The match reports
-`callsign_exact_fallback`; duplicate call signs, invalid MMSI/positions and
-unvalidated or stale records remain rejected. The Bridge uses a 30-minute AIS freshness limit, matching the default
-AIS-catcher retention window. Foreign call signs are not guessed, and a
-rejected or ambiguous standard match is never bypassed.
-
-Routine updates are available from **Bridge updates** in the dashboard. To
-install the beta branch manually, check out `develop` before running
-`sudo ./install.sh`; `main` remains the stable branch.
-
-## Receiver lifecycle fix (0.1.5)
-
-The Bridge runs RTLSDR-Airband with `-F`, keeping it in the foreground without the textual waterfall. This lets the Bridge correctly monitor, stop and restart the receiver instead of reporting `STOPPED` after RTLSDR-Airband daemonizes.
-
-## Installer verification (0.1.4)
-
-The installer now includes the required LAME/libshout development libraries, grants the service access via plugdev and common RTL2832U udev rules, fixes config-directory ownership, preserves existing settings, excludes checkout/build caches, restarts the installed service and checks its version through HTTP. The Airband build uses two jobs and explicitly enables RTL-SDR/NFM while disabling unused optional backends. Existing rtl_airband installations are reused.
-
-To retry a failed installation from a source checkout:
-
-```bash
-cd ~/AIS-ATIS-Bridge
-git pull --ff-only origin main
-sudo ./install.sh
-```
-
-For Beta, check out `develop` and use `git pull --ff-only origin develop`.
-
-If you edited tracked installer files locally, preserve those changes before pulling. The installer does not install or restart AIS-catcher itself.
+[💬 Report an issue](https://github.com/EyeVisionsNL/AIS-ATIS-Bridge/issues) · [📖 Wiki](https://eyevisionsnl.github.io/AIS-ATIS-Bridge/)
